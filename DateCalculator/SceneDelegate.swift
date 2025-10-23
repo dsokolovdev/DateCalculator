@@ -12,13 +12,29 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
 
-    func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
-    }
+    func scene(_ scene: UIScene,
+               willConnectTo session: UISceneSession,
+               options connectionOptions: UIScene.ConnectionOptions) {
+        guard let windowScene = (scene as? UIWindowScene) else { return }
 
+        // 1️⃣ Один общий экземпляр настроек
+        let settingsModel = SettingsModel()
+
+        // 2️⃣ Создаём ViewModel и передаём туда ссылку на ту же модель настроек
+        let viewModel = DateCalculatorViewModel(settingsModel: settingsModel)
+
+        // 3️⃣ Создаём главный экран (DateCalculatorViewController)
+        let dateCalculatorVC = DateCalculatorViewController(viewModel: viewModel)
+
+        // 4️⃣ Оборачиваем в UINavigationController
+        let navController = UINavigationController(rootViewController: dateCalculatorVC)
+
+        // 5️⃣ Создаём окно
+        let window = UIWindow(windowScene: windowScene)
+        window.rootViewController = navController
+        window.makeKeyAndVisible()
+        self.window = window
+    }
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
         // This occurs shortly after the scene enters the background, or when its session is discarded.
