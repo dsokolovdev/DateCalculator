@@ -185,4 +185,11 @@ extension SettingsModel {
         
         return segments
     }
+    
+    var visibleRowLables: [String] {
+        let labels = visibleSegments
+        
+        return labels
+    }
 }
+

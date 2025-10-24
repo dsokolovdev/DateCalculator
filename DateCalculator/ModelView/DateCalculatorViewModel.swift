@@ -20,6 +20,7 @@ protocol DatePickerUpdatable: AnyObject {
 
 protocol SegmentsUpdatable: AnyObject {
     func updateSegments(_ segmetns: [String])
+    func updateRowLables(_ labels: [String])
 }
 
 /// Управляет моделью выбора дат и взаимодействием с UI
@@ -32,10 +33,12 @@ final class DateCalculatorViewModel {
     private(set) var model = DateCalculatorModel()
     let settingsModel: SettingsModel
     private(set) var visibleSegments: [String]
+    private(set) var visibleRowLables: [String]
     
     init(settingsModel: SettingsModel) {
         self.settingsModel = settingsModel
         self.visibleSegments = settingsModel.visibleSegments
+        self.visibleRowLables = settingsModel.visibleRowLables
         self.settingsModel.delegate = self
     }
     
@@ -141,5 +144,7 @@ extension DateCalculatorViewModel: SettingsDelegate {
     func settingsDidUpdate(_ settings: SettingsModel) {
         visibleSegments = settings.visibleSegments
         segmentsDelegate?.updateSegments(visibleSegments)
+        segmentsDelegate?.updateRowLables(visibleRowLables)
     }
+    
 }

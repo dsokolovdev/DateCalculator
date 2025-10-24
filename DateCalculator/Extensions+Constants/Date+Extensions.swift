@@ -112,11 +112,10 @@ extension Date {
 extension Date {
     
     enum Components {
-        case eraComponents, yearComponents, monthComponents, weekComponents, dayComponents
+        case yearComponents, monthComponents, weekComponents, dayComponents
         
         fileprivate var values: Set<Calendar.Component> {
             switch self {
-            case .eraComponents: return [.era, .year, .month, .weekOfMonth, .day]
             case .yearComponents: return [.year, .month, .weekOfMonth, .day]
             case .monthComponents: return [.month, .weekOfMonth, .day]
             case .weekComponents: return [.weekOfYear, .day]

@@ -18,7 +18,7 @@ final class DateCalculatorViewController: UIViewController {
 
     // MARK: - Properties
     private let viewModel:  DateCalculatorViewModel
-    private var currentType: DateCalculatorViewModel.DateType = .from
+    private var currentDateType: DateCalculatorViewModel.DateType = .from
     private var currentLayout: LayoutType = .row
     private var isCalculateModeActive = false
     private var isSelectingStartDate = true
@@ -44,6 +44,7 @@ final class DateCalculatorViewController: UIViewController {
     private var periodSegmentedControlBarView: UIView!
     private var periodSegmentedControl: UISegmentedControl!
     private var valuesView: UIView!
+    private var valuesStack: UIStackView!
     private var infoScrollView: UIScrollView!
     private var startDateLabel: UILabel!
     private var endDateLabel: UILabel!
@@ -77,7 +78,7 @@ final class DateCalculatorViewController: UIViewController {
         setupDateButtonsBarLables()
         setupScrollView()
         
-        viewModel.handleDateChange(startDate, for: currentType)
+        viewModel.handleDateChange(startDate, for: currentDateType)
         let (western, chinese) = viewModel.getHoroscopes(for: Date())
         updateHoroscopeCards(western: western, chinese: chinese)
         
@@ -90,6 +91,7 @@ final class DateCalculatorViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
         updateSegments(viewModel.visibleSegments)
+        updateRowLables(viewModel.visibleRowLables)
         print(viewModel.visibleSegments)
     }
 }
@@ -246,7 +248,7 @@ extension DateCalculatorViewController {
 
     /// Adds four labels in a horizontal stack for displaying calculated values.
     private func setupRowLayout() {
-        let valuesStack = UIStackView()
+        valuesStack = UIStackView()
         valuesStack.axis = .horizontal
         valuesStack.alignment = .center
         valuesStack.distribution = .fillEqually
@@ -257,21 +259,16 @@ extension DateCalculatorViewController {
         NSLayoutConstraint.activate([
             valuesStack.topAnchor.constraint(equalTo: valuesView.topAnchor),
             valuesStack.bottomAnchor.constraint(equalTo: valuesView.bottomAnchor),
-            valuesStack.leadingAnchor.constraint(equalTo: valuesView.leadingAnchor),
-            valuesStack.trailingAnchor.constraint(equalTo: valuesView.trailingAnchor)
+            valuesStack.leadingAnchor.constraint(equalTo: valuesView.leadingAnchor, constant: 8),
+            valuesStack.trailingAnchor.constraint(equalTo: valuesView.trailingAnchor, constant: -8)
         ])
-
-        for _ in 0..<periodSegmentedControl.numberOfSegments {
-            let label = UILabel()
-            label.text = "100"
-            label.textAlignment = .right
-            label.font = .systemFont(ofSize: 34, weight: .medium)
-            label.textColor = .label
-            label.adjustsFontSizeToFitWidth = true
-            label.minimumScaleFactor = 0.8
+        
+        updateViewLabels()
+        for label in valueLabels {
             valuesStack.addArrangedSubview(label)
-            valueLabels.append(label)
         }
+
+        
         //periodSegmentedControl.removeSegment(at: 2, animated: false)
         //periodSegmentedControl.removeSegment(at: 1, animated: false)
     }
@@ -279,7 +276,19 @@ extension DateCalculatorViewController {
 
 extension DateCalculatorViewController {
     func updateViewLabels () {
-
+        valueLabels = []
+        for _ in 0..<periodSegmentedControl.numberOfSegments {
+            let label = UILabel()
+            label.text = "1000"
+            label.textAlignment = .right
+            label.font = .systemFont(ofSize: 34, weight: .medium)
+            label.textColor = .label
+            label.adjustsFontSizeToFitWidth = true
+            label.minimumScaleFactor = 0.8
+            //valuesStack.addArrangedSubview(label)
+            valueLabels.append(label)
+        }
+        
     }
 }
 
@@ -493,8 +502,8 @@ extension DateCalculatorViewController {
     func updateHoroscopeCards(western: WesternHoroscope, chinese: ChineseHoroscope) {
         //guard infoCards.cards.count >= 6 else { return }
         
-        let selectedDate = currentType == .from ? startDate : endDate
-        let leapYear = LeapYear(isLeap: (currentType == .from ? startDate.isLeapYear : endDate.isLeapYear))
+        let selectedDate = currentDateType == .from ? startDate : endDate
+        let leapYear = LeapYear(isLeap: (currentDateType == .from ? startDate.isLeapYear : endDate.isLeapYear))
         let westernZodiac = western.zodiac
         let westernElement = western.element
         let chineseZodiac = chinese.zodiac
@@ -567,23 +576,23 @@ extension DateCalculatorViewController {
 extension DateCalculatorViewController {
     
     @objc private func selectStartDate() {
-        currentType = .from
+        currentDateType = .from
         highlightActiveButton()
-        viewModel.handleDateChange(startDate, for: currentType)
+        viewModel.handleDateChange(startDate, for: currentDateType)
         datePicker.setDate(startDate, animated: true)
         
     }
     
     @objc private func selectEndDate() {
-        currentType = .to
+        currentDateType = .to
         highlightActiveButton()
-        viewModel.handleDateChange(endDate, for: currentType)
+        viewModel.handleDateChange(endDate, for: currentDateType)
         datePicker.setDate(endDate, animated: true)
     }
     
     @objc private func swapDates() {
-        viewModel.swapDates(for: currentType)
-        datePicker.setDate(currentType == .from ? startDate : endDate, animated: true)
+        viewModel.swapDates(for: currentDateType)
+        datePicker.setDate(currentDateType == .from ? startDate : endDate, animated: true)
         //didChangeDate(isSelectingStartDate ? startDate : endDate, for: isSelectingStartDate ? .from : .to)
         //viewModel.handleDateChange(isSelectingStartDate ? startDate : endDate, for: isSelectingStartDate ? .from : .to)
         
@@ -600,14 +609,14 @@ extension DateCalculatorViewController {
 
     @objc private func dateChanged(_ sender: UIDatePicker) {
 
-        viewModel.handleDateChange(sender.date, for: currentType)
+        viewModel.handleDateChange(sender.date, for: currentDateType)
         
     }
 
     private func highlightActiveButton() {
-        print(currentType)
-        startButton.tintColor = currentType == .from ? .systemBlue : .secondaryLabel
-        endButton.tintColor = currentType == .to ? .systemBlue : .secondaryLabel
+        print(currentDateType)
+        startButton.tintColor = currentDateType == .from ? .systemBlue : .secondaryLabel
+        endButton.tintColor = currentDateType == .to ? .systemBlue : .secondaryLabel
         
         
     }
@@ -638,21 +647,21 @@ extension DateCalculatorViewController {
 
     @objc private func goBack() {
         print("← Previous date")
-        viewModel.goBack(for: currentType)
-        datePicker.setDate(currentType == .from ? startDate : endDate, animated: true)
+        viewModel.goBack(for: currentDateType)
+        datePicker.setDate(currentDateType == .from ? startDate : endDate, animated: true)
     }
     
     @objc private func goToday() {
         print(" Today")
         
-        viewModel.goToToday(for: currentType)
-        datePicker.setDate(currentType == .from ? startDate : endDate, animated: true)
+        viewModel.goToToday(for: currentDateType)
+        datePicker.setDate(currentDateType == .from ? startDate : endDate, animated: true)
         
     }
     @objc private func goForward() {
         print("→ Next date")
-        viewModel.goForward(for: currentType)
-        datePicker.setDate(currentType == .from ? startDate : endDate, animated: true)
+        viewModel.goForward(for: currentDateType)
+        datePicker.setDate(currentDateType == .from ? startDate : endDate, animated: true)
     }
 }
  
@@ -726,6 +735,58 @@ extension DateCalculatorViewController: SegmentsUpdatable {
             periodSegmentedControl.insertSegment(withTitle: title, at: index, animated: false)
         }
         periodSegmentedControl.selectedSegmentIndex = 0
+        
     }
+    
+    func updateRowLables(_ labels: [String]) {
+        valuesStack.arrangedSubviews.forEach{ $0.removeFromSuperview() }
+        valueLabels = []
+        for _ in 1...periodSegmentedControl.numberOfSegments {
+            let label = UILabel()
+            label.text = "9000"
+            label.textAlignment = .right
+            valuesStack.addArrangedSubview(label)
+            valueLabels.append(label)
+        }
+    }
+    
+//    func updateRowLabelsValues() {
+//        
+//        switch currentViewMode {
+//            case .full:
+//            if periodSegmentedControl.titleForSegment(at: 0) == "Year" {
+//                valueLabels[0].text = currentDateType == .from ? startDate.getDifference(to: endDate, components: .yearComponents).year : endDate.getDifference(to: startDate, components: .yearComponents).year
+//            }
+//        }
+//    }
 }
 
+
+//extension DateCalculatorViewController {
+//    enum viewMode {
+//        case full
+//        case yearMonthDay
+//        case yearWeekDay
+//        case yearDay
+//    }
+//    
+//    var currentViewMode: viewMode {
+//        switch periodSegmentedControl.numberOfSegments {
+//        case 2: return .yearDay
+//        case 3:
+//            let isMonth = periodSegmentedControl.titleForSegment(at: 1) == "Month"
+//            return isMonth ? .yearMonthDay : .yearWeekDay
+//        default: return .full
+//        
+//        }
+//    }
+//    
+//    enum selectedSegments {
+//        case year
+//        case month
+//        case week
+//        case day
+//    }
+//    
+//    
+//}
