@@ -29,6 +29,8 @@ final class DateCalculatorViewController: UIViewController {
     private var infoCards = InfoCards.Container()
     private let valuesView = ValuesView()
     
+    private lazy var lastSegmentTitle: String = viewModel.visibleSegments[0]
+    
     init(viewModel: DateCalculatorViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -87,19 +89,18 @@ final class DateCalculatorViewController: UIViewController {
         
     }
     
-    override func viewDidAppear(_ animated: Bool) {
-        
-    }
+//    override func viewDidAppear(_ animated: Bool) {
+//        valuesView.refreshLayout()
+//    }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
-        //currentLayout = .grid
-        //let test = ["Year", "Month", "Week", "Day"]
+
         updateSegments(viewModel.visibleSegments)
-        //updateRowLables(viewModel.visibleRowLables)
-        //valuesView.updateLables(viewModel.visibleRowLables)
-        valuesView.updateLayout(for: viewModel.visibleSegments)
-        //print(viewModel.visibleSegments)
+        valuesView.segments = viewModel.visibleSegments
+        valuesView.segmentIndex = periodSegmentedControl.selectedSegmentIndex
+        
+
     }
 }
 
@@ -568,6 +569,7 @@ extension DateCalculatorViewController {
     @objc private func openSettings() {
         let settingsVC = SettingsTableViewController(settingsModel: viewModel.settingsModel)
         navigationController?.pushViewController(settingsVC, animated: true)
+        
     }
     
     @objc private func toggleCalculateMode() {
@@ -586,6 +588,7 @@ extension DateCalculatorViewController {
 
     private func applyLayout(_ layout: LayoutType) {
         print("→ Switched to layout: \(layout.rawValue)")
+        currentLayout = layout
 
     }
 }
@@ -602,7 +605,12 @@ extension DateCalculatorViewController {
     @objc private func periodChanged(_ sender: UISegmentedControl) {
         print("→ Selected period:", sender.titleForSegment(at: sender.selectedSegmentIndex) ?? "?")
         //print(currentViewMode)
+        let selectedIndex = sender.selectedSegmentIndex
         
+        //after settings windows closed segmented control should be at the same segment as before if not set index as 0, see func updateSegments()
+        lastSegmentTitle = viewModel.visibleSegments[selectedIndex]
+        
+        valuesView.segmentIndex = selectedIndex
         updateRowLabelsValues()
     }
 }
@@ -774,9 +782,16 @@ extension DateCalculatorViewController: SegmentsUpdatable {
         for (index, title) in segments.enumerated() {
             periodSegmentedControl.insertSegment(withTitle: title, at: index, animated: false)
         }
-        periodSegmentedControl.selectedSegmentIndex = 0
         
-        valuesView.updateLayout(for: segments)
+        //keep last current segment index to assign it to segmented control after settings closed
+        if let index = viewModel.visibleSegments.firstIndex(where: { $0 == lastSegmentTitle }) {
+            periodSegmentedControl.selectedSegmentIndex = index
+        } else {
+            periodSegmentedControl.selectedSegmentIndex = 0
+        }
+        
+        //valuesView.updateLayout(for: segments)
+        valuesView.segments = segments
     }
     
 //    func updateRowLables(_ labels: [String]) {
