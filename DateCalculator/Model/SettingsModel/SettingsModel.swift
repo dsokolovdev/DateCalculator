@@ -168,28 +168,31 @@ extension SettingsModel {
     /// Returns a list of visible segments for the main screen based on active switches.
     var visibleSegments: [String] {
         var segments: [String] = ["Year", "Day"]
+        var isMonthOn = false
         
         if let monthItem = sections
             .flatMap({ $0.items })
             .first(where: { ($0 as? SwitchItem)?.name == "Month" }) as? SwitchItem,
            monthItem.isOn {
             segments.insert("Month", at: 1)
+            isMonthOn = true
         }
+        print(segments)
         
         if let weekItem = sections
             .flatMap({ $0.items })
             .first(where: { ($0 as? SwitchItem)?.name == "Week" }) as? SwitchItem,
            weekItem.isOn {
-            segments.insert("Week", at: 2)
+            segments.insert("Week", at: isMonthOn ? 2 : 1)
         }
-        
+        print(segments)
         return segments
     }
     
-    var visibleRowLables: [String] {
-        let labels = visibleSegments
-        
-        return labels
-    }
+//    var visibleRowLables: [String] {
+//        return visibleSegments
+//        
+//        
+//    }
 }
 

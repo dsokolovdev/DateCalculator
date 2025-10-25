@@ -20,7 +20,7 @@ protocol DatePickerUpdatable: AnyObject {
 
 protocol SegmentsUpdatable: AnyObject {
     func updateSegments(_ segmetns: [String])
-    func updateRowLables(_ labels: [String])
+    //func updateValuesView(_ labels: [String])
 }
 
 /// Управляет моделью выбора дат и взаимодействием с UI
@@ -33,12 +33,12 @@ final class DateCalculatorViewModel {
     private(set) var model = DateCalculatorModel()
     let settingsModel: SettingsModel
     private(set) var visibleSegments: [String]
-    private(set) var visibleRowLables: [String]
+    //private(set) var visibleRowLables: [String]
     
     init(settingsModel: SettingsModel) {
         self.settingsModel = settingsModel
         self.visibleSegments = settingsModel.visibleSegments
-        self.visibleRowLables = settingsModel.visibleRowLables
+        //self.visibleRowLables = settingsModel.visibleRowLables
         self.settingsModel.delegate = self
     }
     
@@ -144,7 +144,64 @@ extension DateCalculatorViewModel: SettingsDelegate {
     func settingsDidUpdate(_ settings: SettingsModel) {
         visibleSegments = settings.visibleSegments
         segmentsDelegate?.updateSegments(visibleSegments)
-        segmentsDelegate?.updateRowLables(visibleRowLables)
+        //segmentsDelegate?.updateValuesView(visibleRowLables)
     }
     
 }
+
+//extension DateCalculatorViewModel {
+//    
+//    enum viewMode {
+//        case full
+//        case yearMonthDay
+//        case yearWeekDay
+//        case yearDay
+//        
+////        enum selectedSegment {
+////            case year
+////            case month
+////            case week
+////            case day
+////        }
+//        
+//        func getValues(selectedSegment: Int, selectedDate: Date, toDate: Date) -> DateComponents {
+//            switch self {
+//            case .full:
+//                switch selectedSegment {
+//                    case 0: return selectedDate.getDifference(to: toDate, components: .yearComponents)
+//                    case 1: return selectedDate.getDifference(to: toDate, components: .monthComponents)
+//                    case 2: return selectedDate.getDifference(to: toDate, components: .weekComponents)
+//                    case 3: return selectedDate.getDifference(to: toDate, components: .dayComponents)
+//                }
+//            case .yearMonthDay
+//                
+//                return [currentDateType.getDifference(to: .now, components: .yearComponents)]
+//            case .yearMonthDay:
+//                return [currentDateType.getDifference(to: .now, components: .yearComponents),
+//                        currentDateType.getDifference(to: .now, components: .monthComponents),
+//            }
+//        }
+//        
+//        
+//        func currentViewMode () {
+//            switch self {
+//            case .full: return .yearDay
+//            case 3:
+//                let isMonth = self == "Month"
+//                return isMonth ? .yearMonthDay : .yearWeekDay
+//            default: return .full
+//                
+//            }
+//        }
+//        
+//    }
+//    
+//    
+//}
+
+//func updateRowLabelsValues() {
+//        let segment = periodSegmentedControl.selectedSegmentIndex
+//        let valueseArray = viewModel.viewMode.getValues(selectedSegment: segment, currentDateType: currentDateType)
+//        for index in valueLabels {
+//            valueLabels[index] = valueseArray[index]
+//        }
