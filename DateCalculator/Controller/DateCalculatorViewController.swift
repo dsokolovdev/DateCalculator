@@ -132,13 +132,16 @@ extension DateCalculatorViewController {
             image: UIImage(systemName: currentLayout.iconName),
             menu: viewMenu
         )
+        
+        let activeColor = UIColor(red: 0.15, green: 0.24, blue: 0.46, alpha: 1.00)
+        viewButton.tintColor = activeColor
 
         navigationItem.rightBarButtonItems = [viewButton, calculateButton]
     }
 
     /// Creates and returns a menu for switching between layouts.
     private func makeViewMenu() -> UIMenu {
-        let activeColor = UIColor.label
+        let activeColor = UIColor(red: 0.15, green: 0.24, blue: 0.46, alpha: 1.00)
         let inactiveColor = UIColor.systemGray
         
         let rowImage = UIImage(systemName: "circle.grid.2x1.fill", withConfiguration: UIImage.SymbolConfiguration(paletteColors: [currentLayout == .row ? activeColor : inactiveColor]))
@@ -211,7 +214,7 @@ extension DateCalculatorViewController {
         periodSegmentedControl.translatesAutoresizingMaskIntoConstraints = false
         periodSegmentedControl.selectedSegmentTintColor = .systemGray6
         periodSegmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.secondaryLabel], for: .normal)
-        periodSegmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.label], for: .selected)
+        periodSegmentedControl.setTitleTextAttributes([.foregroundColor: UIColor(red: 0.15, green: 0.24, blue: 0.46, alpha: 1.00)], for: .selected)
         periodSegmentedControl.subviews.forEach { $0.backgroundColor = .systemBackground }
         periodSegmentedControl.addTarget(self, action: #selector(periodChanged(_:)), for: .valueChanged)
 
@@ -567,6 +570,7 @@ extension DateCalculatorViewController {
     
     @objc private func swapDates() {
         UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { }
+        UIView.transition(with: valuesView, duration: 0.25, options: [.transitionCrossDissolve]) { }
         viewModel.swapDates(for: currentDateType)
         datePicker.setDate(currentDateType == .from ? startDate : endDate, animated: true)
         //viewModel.notifyValuesDelegate()
