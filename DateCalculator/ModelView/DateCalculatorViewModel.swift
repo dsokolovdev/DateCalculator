@@ -11,7 +11,7 @@ import UIKit
 /// Протокол для уведомления контроллера об изменении даты
 protocol DatePickerUpdatable: AnyObject {
     func didChangeDate(_ date: Date, for type: DateCalculatorViewModel.DateType)
-    func updateHoroscopes(western: WesternHoroscope, chinese: ChineseHoroscope)
+    func updateHoroscopes(for date: Date, western: WesternHoroscope, chinese: ChineseHoroscope)
     func updateNavigationButtons(isBackButtonEnabled: Bool,
                                  isForwardButtonEnabled: Bool,
                                  isTodayButtonEnabled: Bool,
@@ -112,6 +112,9 @@ final class DateCalculatorViewModel {
         delegate?.didChangeDate(model.fromDates.selectedDate, for: .from)
         delegate?.didChangeDate(model.toDates.selectedDate, for: .to)
         
+        let activeDate = (type == .from) ? model.fromDates.selectedDate : model.toDates.selectedDate
+        updateHoroscopes(for: activeDate)
+        
         notifyValuesDelegate()
         updateButtonsState(for: type)
         
@@ -149,7 +152,7 @@ final class DateCalculatorViewModel {
     
     private func updateHoroscopes(for date: Date) {
         let (western, chinese) = getHoroscopes(for: date)
-        delegate?.updateHoroscopes(western: western, chinese: chinese)
+        delegate?.updateHoroscopes(for: date, western: western, chinese: chinese)
     }
     
     func notifyValuesDelegate() {

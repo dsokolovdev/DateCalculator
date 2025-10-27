@@ -83,7 +83,7 @@ final class DateCalculatorViewController: UIViewController {
         
         viewModel.handleDateChange(startDate, for: currentDateType)
         let (western, chinese) = viewModel.getHoroscopes(for: Date())
-        updateHoroscopeCards(western: western, chinese: chinese)
+        updateHoroscopeCards(date: startDate, western: western, chinese: chinese)
         viewModel.notifyValuesDelegate()
         
     }
@@ -459,11 +459,11 @@ extension DateCalculatorViewController {
 }
 
 extension DateCalculatorViewController {
-    func updateHoroscopeCards(western: WesternHoroscope, chinese: ChineseHoroscope) {
+    func updateHoroscopeCards(date: Date, western: WesternHoroscope, chinese: ChineseHoroscope) {
         //guard infoCards.cards.count >= 6 else { return }
         
-        let selectedDate = currentDateType == .from ? startDate : endDate
-        let leapYear = LeapYear(isLeap: (currentDateType == .from ? startDate.isLeapYear : endDate.isLeapYear))
+        //let selectedDate = currentDateType == .from ? startDate : endDate
+        let leapYear = LeapYear(isLeap: date.isLeapYear)
         let westernZodiac = western.zodiac
         let westernElement = western.element
         let chineseZodiac = chinese.zodiac
@@ -481,10 +481,10 @@ extension DateCalculatorViewController {
         infoCards.updateCard(id: .chineseEnergy, with: infoCard.ModelData(title: chineseEnergy.title, icon: chineseEnergy.icon, name: chineseEnergy.name))
         infoCards.updateCard(id: .chineseElement, with: infoCard.ModelData(title: chineseElement.title, icon: chineseElement.icon, name: chineseElement.name))
         infoCards.updateCard(id: .year, with: infoCard.ModelData(title: leapYear.title, icon: leapYear.symbol, name: leapYear.type.name))
-        infoCards.updateCard(id: .statistics, with: statCard.ModelData(dataTitle: selectedDate.weekDayName,
-                                                                       name1: title1, data1: selectedDate.mothOfYear, total1: selectedDate.monthsInYear,
-                                                                       name2: title2, data2: selectedDate.weekOfYear, total2: selectedDate.weeksInYear,
-                                                                       name3: title3, data3: selectedDate.dayOfYear, total3: selectedDate.daysInYear ))
+        infoCards.updateCard(id: .statistics, with: statCard.ModelData(dataTitle: date.weekDayName,
+                                                                       name1: title1, data1: date.mothOfYear, total1: date.monthsInYear,
+                                                                       name2: title2, data2: date.weekOfYear, total2: date.weeksInYear,
+                                                                       name3: title3, data3: date.dayOfYear, total3: date.daysInYear ))
         
 
     }
@@ -663,7 +663,6 @@ extension DateCalculatorViewController {
 }
  
 extension DateCalculatorViewController: DatePickerUpdatable {
-   
     func didChangeDate(_ date: Date, for type: DateCalculatorViewModel.DateType) {
         let formatted = date.readableFormat
         
@@ -675,8 +674,8 @@ extension DateCalculatorViewController: DatePickerUpdatable {
         }
     }
     
-    func updateHoroscopes(western: WesternHoroscope, chinese: ChineseHoroscope) {
-        updateHoroscopeCards(western: western, chinese: chinese)
+    func updateHoroscopes(for date: Date, western: WesternHoroscope, chinese: ChineseHoroscope) {
+        updateHoroscopeCards(date: date, western: western, chinese: chinese)
     }
     
     func updateNavigationButtons(isBackButtonEnabled: Bool, isForwardButtonEnabled: Bool, isTodayButtonEnabled: Bool, isSwapButtonEnabled: Bool) {
