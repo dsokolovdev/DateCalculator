@@ -18,6 +18,7 @@ final class DateCalculatorViewController: UIViewController {
 
     // MARK: - Properties
     private let viewModel:  DateCalculatorViewModel
+    private let impactFeedback = UIImpactFeedbackGenerator(style: .light)
     private var currentDateType: DateCalculatorViewModel.DateType = .from
     private var currentLayout: LayoutType = .row {
         didSet { valuesView.layoutType = currentLayout }
@@ -27,6 +28,11 @@ final class DateCalculatorViewController: UIViewController {
     private var valueLabels: [UILabel] = []
     private var infoCardsCount: Int = 6
     private var infoCards = InfoCards.Container()
+    
+    private var settingsButton: UIBarButtonItem!
+    private var calculateButton: UIBarButtonItem!
+    private var viewButton: UIBarButtonItem!
+    
     private let valuesView = ValuesView()
     
     //private lazy var currentSegmentIndex: Int = 0 { didSet { valuesView.segmentIndex = periodSegmentedControl.selectedSegmentIndex}  }
@@ -81,6 +87,7 @@ final class DateCalculatorViewController: UIViewController {
         setupDateButtonsBarLables()
         setupScrollView()
         
+        
         viewModel.handleDateChange(startDate, for: currentDateType)
         let (western, chinese) = viewModel.getHoroscopes(for: Date())
         updateHoroscopeCards(date: startDate, western: western, chinese: chinese)
@@ -107,83 +114,187 @@ final class DateCalculatorViewController: UIViewController {
 
 // MARK: - UPPER BLOCK SETUP
  // MARK: - Navigation Bar Setup
+//extension DateCalculatorViewController {
+//
+//    /// Configures navigation bar with Settings, Layout menu, and Calculate button.
+//    private func setupNavigationBar() {
+//        let settingsButton = UIBarButtonItem(
+//            image: UIImage(systemName: "gearshape"),
+//            style: .plain,
+//            target: self,
+//            action: #selector(openSettings)
+//        )
+//        navigationItem.leftBarButtonItem = settingsButton
+//        
+//        let config = UIImage.SymbolConfiguration(paletteColors: [.systemGray, .lightGray])
+//        let calculateButton = UIBarButtonItem(
+//            image: UIImage(systemName: "rectangle.and.pencil.and.ellipsis", withConfiguration: config),
+//            style: .plain,
+//            target: self,
+//            action: #selector(toggleCalculateMode)
+//        )
+//
+//        let viewMenu = makeViewMenu()
+//        let viewButton = UIBarButtonItem(
+//            image: UIImage(systemName: currentLayout.iconName),
+//            menu: viewMenu
+//        )
+//        
+//        let activeColor = C.mazarineBlue//UIColor(red: 0.15, green: 0.24, blue: 0.46, alpha: 1.00)
+//        viewButton.tintColor = activeColor
+//
+//        navigationItem.rightBarButtonItems = [viewButton, calculateButton]
+//    }
+//
+//    /// Creates and returns a menu for switching between layouts.
+//    private func makeViewMenu() -> UIMenu {
+//        let activeColor = C.mazarineBlue
+//        let inactiveColor = UIColor.systemGray
+//        
+//        let rowImage = UIImage(systemName: "circle.grid.2x1.fill", withConfiguration: UIImage.SymbolConfiguration(paletteColors: [currentLayout == .row ? activeColor : inactiveColor]))
+//        let gridImage = UIImage(systemName: "circle.grid.3x3.fill", withConfiguration: UIImage.SymbolConfiguration(paletteColors: [currentLayout == .grid ? activeColor : inactiveColor]))
+//        
+//        let actions = [
+//            UIAction(
+//                title: "Row",
+//                image: rowImage,
+//                state: currentLayout == .row ? .on : .off,
+//                handler: { _ in
+//                    self.currentLayout = .row
+//                    self.setupNavigationBar()
+//                    self.applyLayout(.row)
+//                }
+//            ),
+//            UIAction(
+//                title: "Grid",
+//                image: gridImage,
+//                state: currentLayout == .grid ? .on : .off,
+//                handler: { _ in
+//                    self.currentLayout = .grid
+//                    self.setupNavigationBar()
+//                    self.applyLayout(.grid)
+//                }
+//            )
+//        ]
+//        
+//        func attributedTitle(_ text: String, isActive: Bool) -> NSAttributedString {
+//                return NSAttributedString(
+//                    string: text,
+//                    attributes: [
+//                        .foregroundColor: isActive ? activeColor : inactiveColor,
+//                        //.font: UIFont.systemFont(ofSize: 15, weight: isActive ? .semibold : .regular)
+//                    ]
+//                )
+//            }
+//        
+//        actions[0].setValue(attributedTitle("Row", isActive: currentLayout == .row), forKey: "attributedTitle")
+//        actions[1].setValue(attributedTitle("Grid", isActive: currentLayout == .grid), forKey: "attributedTitle")
+//        
+//        return UIMenu(title: "Select Layout", children: actions)
+//    }
+//}
+
+// MARK: - Navigation Bar Setup
 extension DateCalculatorViewController {
 
-    /// Configures navigation bar with Settings, Layout menu, and Calculate button.
+    /// Создаёт и конфигурирует navigation bar с кнопками Settings, Layout и Calculate.
     private func setupNavigationBar() {
-        let settingsButton = UIBarButtonItem(
-            image: UIImage(systemName: "gearshape"),
-            style: .plain,
-            target: self,
-            action: #selector(openSettings)
-        )
-        navigationItem.leftBarButtonItem = settingsButton
-        
-        let config = UIImage.SymbolConfiguration(paletteColors: [.systemGray, .lightGray])
-        let calculateButton = UIBarButtonItem(
-            image: UIImage(systemName: "rectangle.and.pencil.and.ellipsis", withConfiguration: config),
-            style: .plain,
-            target: self,
-            action: #selector(toggleCalculateMode)
-        )
+        // — создаём кнопки только один раз —
+        if settingsButton == nil {
+            settingsButton = UIBarButtonItem(
+                image: UIImage(systemName: "gearshape"),
+                style: .plain,
+                target: self,
+                action: #selector(openSettings)
+            )
+            navigationItem.leftBarButtonItem = settingsButton
+        }
 
-        let viewMenu = makeViewMenu()
-        let viewButton = UIBarButtonItem(
-            image: UIImage(systemName: currentLayout.iconName),
-            menu: viewMenu
-        )
-        
-        let activeColor = UIColor(red: 0.15, green: 0.24, blue: 0.46, alpha: 1.00)
-        viewButton.tintColor = activeColor
+        if calculateButton == nil {
+            let config = UIImage.SymbolConfiguration(paletteColors: [.systemGray, .lightGray])
+            calculateButton = UIBarButtonItem(
+                image: UIImage(systemName: "rectangle.and.pencil.and.ellipsis", withConfiguration: config),
+                style: .plain,
+                target: self,
+                action: #selector(toggleCalculateMode)
+            )
+        }
 
-        navigationItem.rightBarButtonItems = [viewButton, calculateButton]
+        if viewButton == nil {
+            viewButton = UIBarButtonItem(
+                image: UIImage(systemName: currentLayout.iconName),
+                menu: makeViewMenu()
+            )
+            viewButton.tintColor = C.mazarineBlue
+        } else {
+            // — обновляем только меню и иконку, не пересоздаём объект —
+            viewButton.image = UIImage(systemName: currentLayout.iconName)
+            viewButton.menu = makeViewMenu()
+        }
+
+        // — применяем без анимации, чтобы UIKit не выдал warning —
+        UIView.performWithoutAnimation {
+            navigationItem.rightBarButtonItems = [viewButton, calculateButton]
+            navigationItem.leftBarButtonItem = settingsButton
+        }
     }
 
-    /// Creates and returns a menu for switching between layouts.
+    /// Формирует меню выбора Layout (Row / Grid) с актуальной подсветкой.
     private func makeViewMenu() -> UIMenu {
-        let activeColor = UIColor(red: 0.15, green: 0.24, blue: 0.46, alpha: 1.00)
+        let activeColor = C.mazarineBlue
         let inactiveColor = UIColor.systemGray
-        
-        let rowImage = UIImage(systemName: "circle.grid.2x1.fill", withConfiguration: UIImage.SymbolConfiguration(paletteColors: [currentLayout == .row ? activeColor : inactiveColor]))
-        let gridImage = UIImage(systemName: "circle.grid.3x3.fill", withConfiguration: UIImage.SymbolConfiguration(paletteColors: [currentLayout == .grid ? activeColor : inactiveColor]))
-        
-        let actions = [
-            UIAction(
-                title: "Row",
-                image: rowImage,
-                state: currentLayout == .row ? .on : .off,
-                handler: { _ in
-                    self.currentLayout = .row
-                    self.setupNavigationBar()
-                    self.applyLayout(.row)
-                }
-            ),
-            UIAction(
-                title: "Grid",
-                image: gridImage,
-                state: currentLayout == .grid ? .on : .off,
-                handler: { _ in
-                    self.currentLayout = .grid
-                    self.setupNavigationBar()
-                    self.applyLayout(.grid)
-                }
+
+        // Активные иконки
+        let rowImage = UIImage(
+            systemName: "circle.grid.2x1.fill",
+            withConfiguration: UIImage.SymbolConfiguration(
+                paletteColors: [currentLayout == .row ? activeColor : inactiveColor]
             )
-        ]
-        
+        )
+        let gridImage = UIImage(
+            systemName: "circle.grid.3x3.fill",
+            withConfiguration: UIImage.SymbolConfiguration(
+                paletteColors: [currentLayout == .grid ? activeColor : inactiveColor]
+            )
+        )
+
+        // Действия меню
+        let rowAction = UIAction(
+            title: "Row",
+            image: rowImage,
+            state: currentLayout == .row ? .on : .off
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            self.currentLayout = .row
+            self.viewButton.image = UIImage(systemName: LayoutType.row.iconName)
+            self.viewButton.menu = self.makeViewMenu() // просто обновляем меню
+            self.applyLayout(.row)
+        }
+
+        let gridAction = UIAction(
+            title: "Grid",
+            image: gridImage,
+            state: currentLayout == .grid ? .on : .off
+        ) { [weak self] _ in
+            guard let self = self else { return }
+            self.currentLayout = .grid
+            self.viewButton.image = UIImage(systemName: LayoutType.grid.iconName)
+            self.viewButton.menu = self.makeViewMenu()
+            self.applyLayout(.grid)
+        }
+
+        // Красивые цветные подписи
         func attributedTitle(_ text: String, isActive: Bool) -> NSAttributedString {
-                return NSAttributedString(
-                    string: text,
-                    attributes: [
-                        .foregroundColor: isActive ? activeColor : inactiveColor,
-                        //.font: UIFont.systemFont(ofSize: 15, weight: isActive ? .semibold : .regular)
-                    ]
-                )
-            }
-        
-        actions[0].setValue(attributedTitle("Row", isActive: currentLayout == .row), forKey: "attributedTitle")
-        actions[1].setValue(attributedTitle("Grid", isActive: currentLayout == .grid), forKey: "attributedTitle")
-        
-        return UIMenu(title: "Select Layout", children: actions)
+            NSAttributedString(
+                string: text,
+                attributes: [.foregroundColor: isActive ? activeColor : inactiveColor]
+            )
+        }
+
+        rowAction.setValue(attributedTitle("Row", isActive: currentLayout == .row), forKey: "attributedTitle")
+        gridAction.setValue(attributedTitle("Grid", isActive: currentLayout == .grid), forKey: "attributedTitle")
+
+        return UIMenu(title: "Select Layout", children: [rowAction, gridAction])
     }
 }
 
@@ -214,7 +325,7 @@ extension DateCalculatorViewController {
         periodSegmentedControl.translatesAutoresizingMaskIntoConstraints = false
         periodSegmentedControl.selectedSegmentTintColor = .systemGray6
         periodSegmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.secondaryLabel], for: .normal)
-        periodSegmentedControl.setTitleTextAttributes([.foregroundColor: UIColor(red: 0.15, green: 0.24, blue: 0.46, alpha: 1.00)], for: .selected)
+        periodSegmentedControl.setTitleTextAttributes([.foregroundColor: C.mazarineBlue], for: .selected)
         periodSegmentedControl.subviews.forEach { $0.backgroundColor = .systemBackground }
         periodSegmentedControl.addTarget(self, action: #selector(periodChanged(_:)), for: .valueChanged)
 
@@ -396,6 +507,7 @@ extension DateCalculatorViewController {
         infoScrollView.alwaysBounceHorizontal = true
         infoScrollView.backgroundColor = .clear
         infoScrollView.decelerationRate = .fast
+        //infoScrollView.delegate = self
         view.addSubview(infoScrollView)
         
         setupInfoCards(scrollView: infoScrollView)
@@ -480,7 +592,7 @@ extension DateCalculatorViewController {
         infoCards.updateCard(id: .chineseZodiac, with: infoCard.ModelData(title: chineseZodiac.title, icon: chineseZodiac.icon, name: chineseZodiac.name))
         infoCards.updateCard(id: .chineseEnergy, with: infoCard.ModelData(title: chineseEnergy.title, icon: chineseEnergy.icon, name: chineseEnergy.name))
         infoCards.updateCard(id: .chineseElement, with: infoCard.ModelData(title: chineseElement.title, icon: chineseElement.icon, name: chineseElement.name))
-        infoCards.updateCard(id: .year, with: infoCard.ModelData(title: leapYear.title, icon: leapYear.symbol, name: leapYear.type.name))
+        infoCards.updateCard(id: .year, with: infoCard.ModelData(title: leapYear.title, icon: leapYear.symbol, name: leapYear.type.name, color: leapYear.color))
         infoCards.updateCard(id: .statistics, with: statCard.ModelData(dataTitle: date.weekDayName,
                                                                        name1: title1, data1: date.mothOfYear, total1: date.monthsInYear,
                                                                        name2: title2, data2: date.weekOfYear, total2: date.weeksInYear,
@@ -552,6 +664,7 @@ extension DateCalculatorViewController {
 extension DateCalculatorViewController {
     
     @objc private func selectStartDate() {
+        //impactFeedback.impactOccurred()
         currentDateType = .from
         highlightActiveButton()
         viewModel.handleDateChange(startDate, for: currentDateType)
@@ -561,6 +674,7 @@ extension DateCalculatorViewController {
     }
     
     @objc private func selectEndDate() {
+        //impactFeedback.impactOccurred()
         currentDateType = .to
         highlightActiveButton()
         viewModel.handleDateChange(endDate, for: currentDateType)
@@ -569,8 +683,9 @@ extension DateCalculatorViewController {
     }
     
     @objc private func swapDates() {
+        impactFeedback.impactOccurred()
         UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { }
-        UIView.transition(with: valuesView, duration: 0.25, options: [.transitionCrossDissolve]) { }
+        //UIView.transition(with: valuesView, duration: 0.25, options: [.transitionCrossDissolve]) { }
         viewModel.swapDates(for: currentDateType)
         datePicker.setDate(currentDateType == .from ? startDate : endDate, animated: true)
         //viewModel.notifyValuesDelegate()
@@ -592,6 +707,8 @@ extension DateCalculatorViewController {
     @objc private func dateChanged(_ sender: UIDatePicker) {
         UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { [self] in
             viewModel.handleDateChange(sender.date, for: currentDateType)
+            
+            //UIView.transition(with: valuesView, duration: 0.25, options: [.transitionCrossDissolve]) { }
             //updateValuesView()
 
             //viewModel.notifyValuesDelegate()
@@ -635,8 +752,10 @@ extension DateCalculatorViewController {
 extension DateCalculatorViewController {
 
     @objc private func goBack() {
+        impactFeedback.impactOccurred()
         print("← Previous date")
         UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { }
+        //UIView.transition(with: valuesView, duration: 0.25, options: [.transitionCrossDissolve]) { }
         viewModel.goBack(for: currentDateType)
         datePicker.setDate(currentDateType == .from ? startDate : endDate, animated: true)
         //updateValuesView()
@@ -644,8 +763,10 @@ extension DateCalculatorViewController {
     }
     
     @objc private func goToday() {
+        impactFeedback.impactOccurred()
         print(" Today")
         UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { }
+        //UIView.transition(with: valuesView, duration: 0.25, options: [.transitionCrossDissolve]) { }
         viewModel.goToToday(for: currentDateType)
         datePicker.setDate(currentDateType == .from ? startDate : endDate, animated: true)
         //updateValuesView()
@@ -653,8 +774,10 @@ extension DateCalculatorViewController {
         
     }
     @objc private func goForward() {
+        impactFeedback.impactOccurred()
         print("→ Next date")
         UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { }
+        //UIView.transition(with: valuesView, duration: 0.25, options: [.transitionCrossDissolve]) { }
         viewModel.goForward(for: currentDateType)
         datePicker.setDate(currentDateType == .from ? startDate : endDate, animated: true)
         //updateValuesView()
@@ -729,3 +852,51 @@ extension UIImage {
     }
     
 }
+
+//// MARK: - Infinite Scroll for InfoCards
+//extension DateCalculatorViewController: UIScrollViewDelegate {
+//
+//    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//        let pageWidth = scrollView.frame.width
+//        let contentWidth = scrollView.contentSize.width
+//        let offsetX = scrollView.contentOffset.x
+//
+//        let cards = infoCards.containerView.arrangedSubviews
+//        guard cards.count > 2 else { return }
+//
+//        // 🔹 вправо
+//        if offsetX > contentWidth - pageWidth * 0.8 {
+//            guard let first = cards.first else { return }
+//            infoCards.containerView.removeArrangedSubview(first)
+//            first.removeFromSuperview()
+//            infoCards.containerView.addArrangedSubview(first)
+//            
+//            scrollView.layoutIfNeeded()
+//            infoCards.containerView.layoutIfNeeded()
+//            
+//            let shift = first.frame.width + infoCards.containerView.spacing
+//            scrollView.setContentOffset(CGPoint(x: offsetX - shift, y: 0), animated: false)
+//        }
+//
+//        // 🔹 влево
+//        else if offsetX < pageWidth * 0.3 {
+//            guard let last = cards.last else { return }
+//            infoCards.containerView.removeArrangedSubview(last)
+//            last.removeFromSuperview()
+//            infoCards.containerView.insertArrangedSubview(last, at: 0)
+//            
+//            scrollView.layoutIfNeeded()
+//            infoCards.containerView.layoutIfNeeded()
+//            
+//            let shift = last.frame.width + infoCards.containerView.spacing
+//            scrollView.setContentOffset(CGPoint(x: offsetX + shift, y: 0), animated: false)
+//        }
+//    }
+//
+//    override func viewDidLayoutSubviews() {
+//        super.viewDidLayoutSubviews()
+//        view.layoutIfNeeded()
+//        infoCards.containerView.layoutIfNeeded()
+//        infoScrollView?.contentSize = infoCards.containerView.frame.size
+//    }
+//}

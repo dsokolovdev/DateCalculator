@@ -54,10 +54,12 @@ final class InfoCards {
     
     // MARK: - Карточка гороскопов и года
     final class InfoCard: UpdatableCard {
+        private var lastName: String?
         struct ModelData {
             let title: String
             let icon: String
             let name: String
+            var color: UIColor? = nil
         }
         
         let cardType: InfoCardType
@@ -87,43 +89,116 @@ final class InfoCards {
         }
         
         private func setupView() {
-            let stack = UIStackView(arrangedSubviews: [titleLabel, iconLabel, nameLabel])
-            stack.axis = .vertical
-            stack.spacing = 4
-            stack.translatesAutoresizingMaskIntoConstraints = false
-            
-//            overlay.backgroundColor = cardType.backgroundColor
-//            overlay.layer.cornerRadius = 10
-//            overlay.layer.masksToBounds = true
-//            
-//            cardView.addSubview(overlay)
-//            overlay.addSubview(stack)
-            
-            cardView.addSubview(stack)
-            cardView.backgroundColor = cardType.backgroundColor
+            // 1️⃣ Основная view, только для тени (НЕ прозрачная!)
+            cardView.backgroundColor = .systemBackground // или .white
             cardView.layer.cornerRadius = 10
+            cardView.layer.shadowColor = UIColor.black.cgColor
             cardView.layer.shadowOpacity = 0.1
             cardView.layer.shadowRadius = 4
             cardView.layer.shadowOffset = CGSize(width: 0, height: 2)
             cardView.translatesAutoresizingMaskIntoConstraints = false
-            
+
+            // 2️⃣ Полупрозрачная наложка поверх (здесь можно делать withAlphaComponent)
+            let overlayView = UIView()
+            overlayView.backgroundColor = cardType.backgroundColor // может быть с альфой!
+            overlayView.layer.cornerRadius = 10
+            overlayView.layer.masksToBounds = true
+            overlayView.translatesAutoresizingMaskIntoConstraints = false
+
+            // 3️⃣ Стек с текстом и иконками
+            let stack = UIStackView(arrangedSubviews: [titleLabel, iconLabel, nameLabel])
+            stack.axis = .vertical
+            stack.spacing = 4
+            stack.translatesAutoresizingMaskIntoConstraints = false
+
+            // 4️⃣ Добавляем иерархию
+            cardView.addSubview(overlayView)
+            overlayView.addSubview(stack)
+
+            // 5️⃣ Констрейнты
             NSLayoutConstraint.activate([
-                stack.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 6),
-                stack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
-                stack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
-                stack.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -6),
+                overlayView.topAnchor.constraint(equalTo: cardView.topAnchor),
+                overlayView.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
+                overlayView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
+                overlayView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor),
+
+                stack.topAnchor.constraint(equalTo: overlayView.topAnchor, constant: 6),
+                stack.leadingAnchor.constraint(equalTo: overlayView.leadingAnchor),
+                stack.trailingAnchor.constraint(equalTo: overlayView.trailingAnchor),
+                stack.bottomAnchor.constraint(equalTo: overlayView.bottomAnchor, constant: -6),
+
                 cardView.widthAnchor.constraint(equalToConstant: 130),
                 cardView.heightAnchor.constraint(equalToConstant: 90)
             ])
+            cardView.layer.shadowPath = UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: 130, height: 90), cornerRadius: 10).cgPath
         }
         
         func asView() -> UIView { cardView }
         
         func update(with data: ModelData) {
+            let hasTypeChanged = data.name != lastName
+            lastName = data.name
+
             UIView.transition(with: cardView, duration: 0.25, options: [.transitionCrossDissolve]) { [self] in
                 titleLabel.text = data.title
-                iconLabel.text = data.icon
-                nameLabel.text = data.name
+                nameLabel.text  = data.name
+
+                // Если это карточка с SF Symbol (например, Year)
+                if data.title == "Year" {
+                    let config = UIImage.SymbolConfiguration(pointSize: 26, weight: .bold)
+                    if let image = UIImage(systemName: data.icon, withConfiguration: config)?
+                        .withTintColor(data.color ?? .secondaryLabel, renderingMode: .alwaysOriginal) {
+
+                        let attachment = NSTextAttachment()
+                        attachment.image = image
+                        let attrString = NSAttributedString(attachment: attachment)
+
+                        if hasTypeChanged {
+                            UIView.animate(withDuration: 0.25,
+                                           animations: {
+                                               self.iconLabel.alpha = 0.3
+                                               self.iconLabel.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
+                                           },
+                                           completion: { _ in
+                                               self.iconLabel.attributedText = attrString
+                                               UIView.animate(withDuration: 0.4,
+                                                              delay: 0,
+                                                              usingSpringWithDamping: 0.6,
+                                                              initialSpringVelocity: 0.3,
+                                                              options: [.curveEaseOut]) {
+                                                   self.iconLabel.alpha = 1.0
+                                                   self.iconLabel.transform = .identity
+                                               }
+                                           })
+                        } else {
+                            self.iconLabel.attributedText = attrString
+                        }
+                    }
+                } else {
+                    // обычные иконки (эмодзи / текст)
+                    if hasTypeChanged {
+                        UIView.animate(withDuration: 0.25,
+                                       animations: {
+                                           self.iconLabel.alpha = 0.3
+                                           self.iconLabel.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
+                                       },
+                                       completion: { _ in
+                                           self.iconLabel.text = data.icon
+                                           self.iconLabel.textColor = data.color ?? .label
+                                           UIView.animate(withDuration: 0.4,
+                                                          delay: 0,
+                                                          usingSpringWithDamping: 0.6,
+                                                          initialSpringVelocity: 0.3,
+                                                          options: [.curveEaseOut]) {
+                                               self.iconLabel.alpha = 1.0
+                                               self.iconLabel.transform = .identity
+                                           }
+                                       })
+                    } else {
+                        self.iconLabel.text = data.icon
+                        self.iconLabel.textColor = data.color ?? .label
+                    }
+                }
             }
         }
     }
@@ -295,217 +370,3 @@ extension InfoCards.Container {
     }
 }
 
-//MARK: - Separate classes implementations
-//
-//// MARK: - Протокол для всех карточек
-//protocol UpdatableCard: AnyObject {
-//    associatedtype DataModel
-//    func update(with data: DataModel)
-//    func asView() -> UIView
-//}
-//// MARK: - Type Erasure (обертка)
-//final class AnyUpdatableCard {
-//    private let _asView: () -> UIView
-//    private let _update: (Any) -> Void
-//
-//    init<T: UpdatableCard>(_ card: T) {
-//        _asView = { card.asView() }
-//        _update = { data in
-//            if let typedData = data as? T.DataModel {
-//                card.update(with: typedData)
-//            }
-//        }
-//    }
-//
-//    func asView() -> UIView { _asView() }
-//    func update(with data: Any) { _update(data) }
-//}
-//
-//// MARK: - Контейнер карточек
-//final class InfoCardsContainer {
-//
-//    enum CardID {
-//        case westernZodiac, westernElement
-//        case chineseZodiac, chineseElement, chineseEnergy
-//        case year
-//        case statistics
-//    }
-//
-//    private(set) var cards: [CardID: AnyUpdatableCard] = [:]
-//    let containerView = UIStackView()
-//
-//    init() {
-//        containerView.axis = .horizontal
-//        containerView.alignment = .center
-//        containerView.spacing = 10
-//        containerView.translatesAutoresizingMaskIntoConstraints = false
-//    }
-//
-//    // Добавление карточек
-//    func addCard<T: UpdatableCard>(_ card: T, id: CardID) {
-//        let wrapped = AnyUpdatableCard(card)
-//        cards[id] = wrapped
-//        containerView.addArrangedSubview(wrapped.asView())
-//    }
-//    
-//    // Обновление карточки по ID
-//    func updateCard(id: CardID, with data: Any) {
-//        cards[id]?.update(with: data)
-//    }
-//}
-//
-//final class InfoCards {
-//    // Тип/группа карточки → отвечает за стиль (фон)
-//    enum InfoCardType {
-//        case western
-//        case chinese
-//        case year
-//        case statistics
-//        
-//        var backgroundColor: UIColor {
-//            switch self {
-//            case .western:    return .systemGray6
-//            case .chinese:    return .systemGreen.withAlphaComponent(0.10)
-//            case .year:       return .systemYellow.withAlphaComponent(0.10)
-//            case .statistics: return .secondarySystemBackground // лучше чем .white для тёмной темы
-//            }
-//        }
-//    }
-//    
-//    
-//    // MARK: - InfoCard (гороскопы и год)
-//    final class InfoCard: UpdatableCard {
-//        
-//        struct DataModel {
-//            let title: String
-//            let icon: String
-//            let name: String
-//        }
-//        
-//        let cardType: InfoCardType
-//        private let titleLabel = UILabel()
-//        private let iconLabel = UILabel()
-//        private let nameLabel = UILabel()
-//        private let cardView = UIView()
-//        
-//        init(cardType: InfoCardType) {
-//            self.cardType = cardType
-//            setupLabels()
-//            setupView(type: cardType)
-//        }
-//        
-//        private func setupLabels() {
-//            titleLabel.font = .systemFont(ofSize: 12, weight: .regular)
-//            titleLabel.textAlignment = .center
-//            titleLabel.textColor = .secondaryLabel
-//            
-//            iconLabel.font = .systemFont(ofSize: 34, weight: .regular)
-//            iconLabel.textAlignment = .center
-//            
-//            nameLabel.font = .systemFont(ofSize: 13, weight: .medium)
-//            nameLabel.textAlignment = .center
-//            nameLabel.textColor = .label
-//        }
-//        
-//        private func setupView(type: InfoCardType) {
-//            let stack = UIStackView(arrangedSubviews: [titleLabel, iconLabel, nameLabel])
-//            stack.axis = .vertical
-//            stack.spacing = 4
-//            stack.translatesAutoresizingMaskIntoConstraints = false
-//            
-//            cardView.addSubview(stack)
-//            cardView.backgroundColor = type.backgroundColor
-//            cardView.layer.cornerRadius = 10
-//            cardView.layer.shadowOpacity = 0.1
-//            cardView.layer.shadowRadius = 4
-//            cardView.layer.shadowOffset = CGSize(width: 0, height: 2)
-//            cardView.translatesAutoresizingMaskIntoConstraints = false
-//            
-//            NSLayoutConstraint.activate([
-//                stack.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 6),
-//                stack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
-//                stack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
-//                stack.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -6),
-//                cardView.widthAnchor.constraint(equalToConstant: 130),
-//                cardView.heightAnchor.constraint(equalToConstant: 90)
-//            ])
-//        }
-//        
-//        func asView() -> UIView { cardView }
-//        
-//        func update(with data: DataModel) {
-//            titleLabel.text = data.title
-//            iconLabel.text = data.icon
-//            nameLabel.text = data.name
-//        }
-//    }
-//    
-//    
-//    // MARK: - StatisticsCard
-//    final class StatisticsCard: UpdatableCard {
-//        
-//        struct DataModel {
-//            let title: String
-//            let weekDay: String
-//            let day: String
-//            let week: String
-//        }
-//        let cardType: InfoCardType
-//        private let titleLabel = UILabel()
-//        private let weekDayLabel = UILabel()
-//        private let dayLabel = UILabel()
-//        private let weekLabel = UILabel()
-//        private let cardView = UIView()
-//        
-//        init(cardType: InfoCardType) {
-//            self.cardType = cardType
-//            setupLabels()
-//            setupView(type: cardType)
-//        }
-//        
-//        private func setupLabels() {
-//            titleLabel.font = .systemFont(ofSize: 12, weight: .regular)
-//            titleLabel.textAlignment = .center
-//            titleLabel.textColor = .secondaryLabel
-//            
-//            [weekDayLabel, dayLabel, weekLabel].forEach {
-//                $0.font = .systemFont(ofSize: 13, weight: .medium)
-//                $0.textAlignment = .center
-//                $0.textColor = .label
-//            }
-//        }
-//        
-//        private func setupView(type: InfoCardType) {
-//            let stack = UIStackView(arrangedSubviews: [titleLabel, weekDayLabel, dayLabel, weekLabel])
-//            stack.axis = .vertical
-//            stack.spacing = 4
-//            stack.translatesAutoresizingMaskIntoConstraints = false
-//            
-//            cardView.addSubview(stack)
-//            cardView.backgroundColor = type.backgroundColor
-//            cardView.layer.cornerRadius = 10
-//            cardView.layer.shadowOpacity = 0.1
-//            cardView.layer.shadowRadius = 4
-//            cardView.layer.shadowOffset = CGSize(width: 0, height: 2)
-//            cardView.translatesAutoresizingMaskIntoConstraints = false
-//            
-//            NSLayoutConstraint.activate([
-//                stack.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 6),
-//                stack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor),
-//                stack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
-//                stack.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -6),
-//                cardView.widthAnchor.constraint(equalToConstant: 130),
-//                cardView.heightAnchor.constraint(equalToConstant: 90)
-//            ])
-//        }
-//        
-//        func asView() -> UIView { cardView }
-//        
-//        func update(with data: DataModel) {
-//            titleLabel.text = data.title
-//            weekDayLabel.text = data.weekDay
-//            dayLabel.text = data.day
-//            weekLabel.text = data.week
-//        }
-//    }
-//}

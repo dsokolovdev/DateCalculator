@@ -18,6 +18,7 @@ final class SettingsTableViewController: UITableViewController, SettingsActionDe
 
     // MARK: - Initialization
     private let settingsModel: SettingsModel
+    private let impactFeedback = UIImpactFeedbackGenerator(style: .light)
 
         init(settingsModel: SettingsModel) {
             self.settingsModel = settingsModel
@@ -60,6 +61,9 @@ final class SettingsTableViewController: UITableViewController, SettingsActionDe
 
         // Configure footer view
         configureFooter()
+        
+        // 🔧 Отключаем эффект прокрутки / растяжения
+        tableView.bounces = false
     }
 }
 
@@ -97,7 +101,10 @@ extension SettingsTableViewController {
             button.tag = indexPath.section * 100 + indexPath.row
             button.isEnabled = buttonItem.isEnabled
             button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+            button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+            button.contentHorizontalAlignment = .right
             button.sizeToFit()
+            //button.frame = CGRect(x: 0, y: 0, width: 130, height: 34)
             cell.accessoryView = button
         }
 
@@ -135,6 +142,7 @@ extension SettingsTableViewController {
 
     /// Handles Reset button tap.
     @objc func buttonTapped(_ sender: UIButton) {
+        impactFeedback.impactOccurred()
         let sectionIndex = sender.tag / 100
         let rowIndex = sender.tag % 100
 
@@ -144,6 +152,7 @@ extension SettingsTableViewController {
 
     /// Called when the Reset to Defaults action is triggered via delegate.
     func resetToDefaults() {
+        impactFeedback.impactOccurred()
         print("→ Reset to defaults triggered via delegate")
         settingsModel.resetToDefaults()
         settingsModel.updateResetButtonState()

@@ -63,7 +63,9 @@ final class ValuesView: UIView, LayoutDisplayable {
         startDate = start
         endDate = end
         updateLabelsValues()
+        
     }
+
 }
 //MARK: - Delegate
 extension ValuesView: ValuesViewUpdatable {
@@ -159,7 +161,7 @@ extension ValuesView {
         
         for row in 0..<rows {
             var rowLabels: [UILabel] = []
-            for space in 0..<labelCount - row {
+            for _ in 0..<labelCount - row {
                 let label = UILabel()
                 //label.text = "0"
                 label.textAlignment = .right
@@ -193,10 +195,10 @@ extension ValuesView {
     
     private func updateLabelsColor() {
         if layoutType == .row {
-            valueLabels[0][0].textColor = UIColor(red: 0.15, green: 0.24, blue: 0.46, alpha: 1.00)
+            valueLabels[0][0].textColor = C.mazarineBlue//UIColor(red: 0.15, green: 0.24, blue: 0.46, alpha: 1.00)
         } else if layoutType == .grid {
             
-            valueLabels[segmentIndex][0].textColor = UIColor(red: 0.15, green: 0.24, blue: 0.46, alpha: 1.00)
+            valueLabels[segmentIndex][0].textColor = C.mazarineBlue
             for (rowIndex, rowLables) in valueLabels.enumerated() {
                 for label in rowLables where rowIndex != segmentIndex {
                     label.textColor = UIColor.secondaryLabel.withAlphaComponent(0.5)
@@ -215,6 +217,11 @@ extension ValuesView {
             return abs(v).formatted(.number)
         }
         
+        func animateLabelTextChange(_ label: UILabel, newText: String) {
+            guard label.text != newText else { return }
+            UIView.transition(with: label, duration: 0.25, options: [.transitionCrossDissolve, .allowUserInteraction], animations: { label.text = newText }, completion: nil)
+        }
+        
         if layoutType == .row {
             if segments.count == 4 {
                 switch segmentIndex {
@@ -222,25 +229,25 @@ extension ValuesView {
                     let diff = startDate.getDifference(to: endDate, components: .cYMWD)
                     let values = [f(diff.year), f(diff.month), f(diff.weekOfMonth), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
+                        animateLabelTextChange(label, newText: values[i])
                     }
                 case 1:
                     let diff = startDate.getDifference(to: endDate, components: .cMWD)
                     let values = [f(diff.month), f(diff.weekOfMonth), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
+                        animateLabelTextChange(label, newText: values[i])
                     }
                 case 2:
                     let diff = startDate.getDifference(to: endDate, components: .cWD)
                     let values = [f(diff.weekOfYear), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
+                        animateLabelTextChange(label, newText: values[i])
                     }
                 case 3:
                     let diff = startDate.getDifference(to: endDate, components: .cD)
                     let values = [f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
+                        animateLabelTextChange(label, newText: values[i])
                     }
                 default: break
                 }
@@ -250,19 +257,19 @@ extension ValuesView {
                     let diff = startDate.getDifference(to: endDate, components: .cYMD)
                     let values = [f(diff.year), f(diff.month), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
+                        animateLabelTextChange(label, newText: values[i])
                     }
                 case 1:
                     let diff = startDate.getDifference(to: endDate, components: .cMD)
                     let values = [f(diff.month), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
+                        animateLabelTextChange(label, newText: values[i])
                     }
                 case 2:
                     let diff = startDate.getDifference(to: endDate, components: .cD)
                     let values = [f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
+                        animateLabelTextChange(label, newText: values[i])
                     }
                 default: break
                 }
@@ -272,19 +279,19 @@ extension ValuesView {
                     let diff = startDate.getDifference(to: endDate, components: .cYWD)
                     let values = [f(diff.year), f(diff.weekOfYear), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
+                        animateLabelTextChange(label, newText: values[i])
                     }
                 case 1:
                     let diff = startDate.getDifference(to: endDate, components: .cWD)
                     let values = [f(diff.weekOfYear), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
+                        animateLabelTextChange(label, newText: values[i])
                     }
                 case 2:
                     let diff = startDate.getDifference(to: endDate, components: .cD)
                     let values = [f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
+                        animateLabelTextChange(label, newText: values[i])
                     }
                 default: break
                 }
@@ -294,13 +301,13 @@ extension ValuesView {
                     let diff = startDate.getDifference(to: endDate, components: .cYD)
                     let values = [f(diff.year), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
+                        animateLabelTextChange(label, newText: values[i])
                     }
                 case 1:
                     let diff = startDate.getDifference(to: endDate, components: .cD)
                     let values = [f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
+                        animateLabelTextChange(label, newText: values[i])
                     }
                 default: break
                 }
@@ -352,7 +359,7 @@ extension ValuesView {
             // применяем к меткам
             for (rowIndex, rowLabels) in valueLabels.enumerated() where rowIndex < values.count {
                 for (colIndex, label) in rowLabels.enumerated() where colIndex < values[rowIndex].count {
-                    label.text = values[rowIndex][colIndex]
+                    animateLabelTextChange(label, newText: values[rowIndex][colIndex])
                 }
             }
         }

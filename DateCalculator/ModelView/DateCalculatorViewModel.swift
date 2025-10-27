@@ -55,17 +55,18 @@ final class DateCalculatorViewModel {
         switch type {
         case .from:
             model.fromDates.updateSelectedDate(date, triggeredByUser: true)
-            delegate?.didChangeDate(model.fromDates.selectedDate, for: .from)
             updateHoroscopes(for: model.fromDates.selectedDate)
+            delegate?.didChangeDate(model.fromDates.selectedDate, for: .from)
+            
         case .to:
             model.toDates.updateSelectedDate(date, triggeredByUser: true)
-            delegate?.didChangeDate(model.toDates.selectedDate, for: .to)
             updateHoroscopes(for: model.toDates.selectedDate)
+            delegate?.didChangeDate(model.toDates.selectedDate, for: .to)
+            
         }
         
         notifyValuesDelegate()
         updateButtonsState(for: type)
-        
         model.log(model.fullDebugInfo)
         
     }

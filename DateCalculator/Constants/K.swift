@@ -6,7 +6,7 @@
 //  Centralized constants for identifiers, keys, and static values.
 //
 
-import Foundation
+import UIKit
 
 /// A namespace containing all constant values used across the app.
 struct K {
@@ -32,3 +32,4 @@ struct K {
         static let weeksSwitch = "Weeks"
     }
 }
+

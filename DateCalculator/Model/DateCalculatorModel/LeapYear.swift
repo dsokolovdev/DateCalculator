@@ -17,13 +17,14 @@ struct LeapYear {
     }
     
     var title: String { "Year" }
-    var symbol: String { "✨" }
+    //var symbol: String { "✨" }
+    var symbol: String { "sparkles" } // SF Symbol
     var color: UIColor
     var type: YearType
     
     init(isLeap: Bool) {
         self.type = isLeap ? .leapYear : .commonYear
-        self.color = isLeap ? .systemYellow : .systemGray3
+        self.color = isLeap ? .systemYellow : UIColor.secondaryLabel.withAlphaComponent(0.2)
     }
 }
 
