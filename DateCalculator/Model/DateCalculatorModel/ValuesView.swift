@@ -7,144 +7,22 @@
 
 import UIKit
 
-//final class ValuesView: UIView, LayoutDisplayable {
-//    
-//    var layoutType: LayoutType = .row //{ didSet { updateLayout() } }
-//    
-////    enum LayoutMode { case row, grid }
-////    var mode: LayoutMode = .row { didSet { updateLayout() } }
-//    
-//    
-//    
-//    private var valueLabels = [[UILabel]]()
-//    private var hStacks = [UIStackView]()
-//    private var vStack = [UIStackView]()
-//    private var rows: Int = 1
-//    
-//
-//    
-//    override init(frame: CGRect) {
-//        super.init(frame: frame)
-//        setupAppearance()
-//    }
-//    required init?(coder: NSCoder) {
-//        super.init(coder: coder)
-//        setupAppearance()
-//        //fatalError("init(coder:) has not been implemented")
-//    }
-//    
-//    private func setupAppearance() {
-//        backgroundColor = .systemBackground
-//        layer.cornerRadius = 20
-//        layer.shadowColor = UIColor.black.cgColor
-//        layer.shadowOpacity = 0.05
-//        layer.shadowRadius = 4
-//        layer.shadowOffset = CGSize(width: 0, height: 2.5)
-//    }
-//    
-//    private func updateViews(for segments: [String]) {
-//        subviews.forEach { $0.removeFromSuperview() }
-//        
-//        switch layoutType {
-//        case .row:
-//            let hStack = makeHStack(labels: valueLabels.first ?? [])
-//            addNewSubview(hStack)
-//            
-//        case .grid:
-//            let vStack = UIStackView()
-//            vStack.axis = .vertical
-//            vStack.alignment = .fill
-//            vStack.distribution = .fillEqually
-//            vStack.spacing = 8
-//            
-//            for rowLabels in valueLabels {
-//                let hStack = makeHStack(labels: rowLabels)
-//                vStack.addArrangedSubview(hStack)
-//            }
-//            addNewSubview(vStack)
-//            
-//            //in case view shoud autoresize if number of rows changed
-////            invalidateIntrinsicContentSize()
-////            layoutIfNeeded()
-//        }
-//        
-//    }
-//    
-//    private func makeHStack(labels: [UILabel]) -> UIStackView {
-//        let stack = UIStackView(arrangedSubviews: labels)
-//        stack.axis = .horizontal
-//        stack.spacing = 8
-//        stack.distribution = .fillEqually
-//        stack.alignment = .fill
-//        return stack
-//    }
-//    
-//    func updateLayout(for segments: [String]) {
-//        updateLables(for: segments)
-//        updateViews(for: segments)
-//    }
-//    
-//    func addNewSubview(_ subview: UIView) {
-//        addSubview(subview)
-//        subview.translatesAutoresizingMaskIntoConstraints = false
-//        NSLayoutConstraint.activate([
-//            subview.topAnchor.constraint(equalTo: topAnchor),
-//            subview.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
-//            subview.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
-//            subview.bottomAnchor.constraint(equalTo: bottomAnchor)
-//        ])
-//    }
-//    
-//    //MARK: - Public API
-//    private func updateLables(for segments: [String]) {
-//        valueLabels.removeAll()
-//        rows = layoutType == .row ? 1 : segments.count
-//        for _ in 0..<rows {
-//            var rowLabels: [UILabel] = []
-//            for _ in 0..<segments.count {
-//                let label = UILabel()
-//                label.text = "0"
-//                label.textAlignment = .right
-//                label.textColor = .label
-//                label.adjustsFontSizeToFitWidth = true
-//                label.minimumScaleFactor = 0.8
-//                label.font = .systemFont(ofSize: 26, weight: .medium)
-//                rowLabels.append(label)
-//            }
-//            valueLabels.append(rowLabels)
-//        }
-//        //updateLayout()
-//    }
-//}
-
-import UIKit
-
 final class ValuesView: UIView, LayoutDisplayable {
-    
+
     // MARK: - Public Properties
-    
-    /// Тип расположения: row или grid
-    var layoutType: LayoutType = .row {
-        didSet { refreshLayout() } // ⚙️ Автообновление при смене типа
-    }
-    
-    /// Список сегментов, для которых нужно отрисовать лейблы
-    var segments: [String] = [] {
-        didSet { refreshLayout() } // ⚙️ Автообновление при смене сегментов
-    }
-    
-    var segmentIndex: Int = 0 {
-        didSet { refreshLayout() }
-    }
+    var layoutType: LayoutType = .row { didSet { refreshLayout() } }
     
     // MARK: - Private Properties
+    private var segments: [String] = [] //{ didSet { refreshLayout() } }
+    private var segmentIndex: Int = 0 //{ didSet { refreshLayout() } }
+    private var startDate: Date?
+    private var endDate: Date?
     
     private var valueLabels = [[UILabel]]()
     private var rows: Int = 1
-    private var didSetupLabelConstraints = false
+    private var hasLaidOutOnce = false
     
     // MARK: - Init
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupAppearance()
@@ -157,13 +35,57 @@ final class ValuesView: UIView, LayoutDisplayable {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        guard !didSetupLabelConstraints, !segments.isEmpty else { return }
-        didSetupLabelConstraints = true
-        refreshLayout()
+        guard !segments.isEmpty else { return }
+        
+        updateLablesConstraints()
+        
+        if !hasLaidOutOnce {
+            hasLaidOutOnce = true
+            refreshLayout()
+        }
     }
     
-    // MARK: - Setup
+    // MARK: - Public API
+    /// Принудительно обновить layout (например, если хочешь обновить значения)
+    func refreshLayout() {
+        guard !segments.isEmpty else { return }
+        updateLabels()
+        updateViews()
+        updateLabelsValues()
+        updateLabelsColor()
+    }
     
+    func updateDates(from start: Date, to end: Date) {
+        startDate = start
+        endDate = end
+        updateLabelsValues()
+    }
+}
+//MARK: - Delegate
+extension ValuesView: ValuesViewUpdatable {
+    func updateValues(segments: [String], selectedIndex: Int, from start: Date, to end: Date) {
+        let shouldRefresh = self.segments != segments || self.segmentIndex != selectedIndex
+        
+        self.segments = segments
+        self.segmentIndex = selectedIndex
+        self.startDate = start
+        self.endDate = end
+        
+        refreshLayout()
+//        if shouldRefresh {
+//            refreshLayout()        // пересоздаём лейблы и стек
+//        } else {
+//            updateLabelsValues()   // просто обновляем цифры
+//        }
+        
+        print("ValuesView - Delegate: segmentIndex:\(segmentIndex)")
+
+        //self.updateDates(from: start, to: end)
+    }
+}
+
+//MARK: - View
+extension ValuesView {
     private func setupAppearance() {
         backgroundColor = .systemBackground
         layer.cornerRadius = 20
@@ -172,63 +94,17 @@ final class ValuesView: UIView, LayoutDisplayable {
         layer.shadowRadius = 4
         layer.shadowOffset = CGSize(width: 0, height: 2.5)
     }
-    
-    // MARK: - Public API
-    
-    /// Принудительно обновить layout (например, если хочешь обновить значения)
-    func refreshLayout() {
-        guard !segments.isEmpty else { return }
-        updateLabels()
-        updateViews()
-    }
-    
-    // MARK: - Private
-    
-    private func updateLabels() {
-        valueLabels.removeAll()
-        rows = layoutType == .row ? 1 : segments.count
-        let fontSize = (max: 30.0, min: 18.0)
-        let size = layoutType == .row ? 30 : fontSize.max - (fontSize.max - fontSize.min)/4 * Double(segments.count)
-        let labelCount = layoutType == .row ? segments.count - segmentIndex : segments.count
-        
-        print("Segments: \(segments.count), segmentIndex: \(segmentIndex), Lables: \(labelCount)")
-        
-        for row in 0..<rows {
-            var rowLabels: [UILabel] = []
-            for space in 0..<labelCount - row {
-                let label = UILabel()
-                label.text = "0"
-                label.textAlignment = .right
-                label.textColor = .label
-                label.adjustsFontSizeToFitWidth = true
-                label.minimumScaleFactor = 0.8
-                label.font = .systemFont(ofSize: size, weight: .medium)
-                
-                if space > 0 {
-                    updateConstraintsfor(label: label)
-                }
-                
-                rowLabels.append(label)
-            }
-            valueLabels.append(rowLabels)
-        }
-    }
-    
-    private func updateConstraintsfor(label: UILabel){
-        let spacing: CGFloat = 8
-        let segmentWidth = (bounds.width - spacing * 2) / CGFloat(segments.count)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        let widthConstraint = label.widthAnchor.constraint(equalToConstant: CGFloat(segmentWidth))
-        label.addConstraint(widthConstraint)
-    }
-    
+}
+
+//MARK: - SubView
+extension ValuesView {
     private func updateViews() {
         subviews.forEach { $0.removeFromSuperview() }
         
         switch layoutType {
         case .row:
             let hStack = makeHStack(labels: valueLabels.first ?? [])
-            addFullSizeSubview(hStack)
+            addNewSubview(hStack)
             
         case .grid:
             let vStack = UIStackView()
@@ -241,7 +117,7 @@ final class ValuesView: UIView, LayoutDisplayable {
                 let hStack = makeHStack(labels: rowLabels)
                 vStack.addArrangedSubview(hStack)
             }
-            addFullSizeSubview(vStack)
+            addNewSubview(vStack)
         }
     }
     
@@ -254,7 +130,7 @@ final class ValuesView: UIView, LayoutDisplayable {
         return stack
     }
     
-    private func addFullSizeSubview(_ subview: UIView) {
+    private func addNewSubview(_ subview: UIView) {
         addSubview(subview)
         subview.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -264,30 +140,303 @@ final class ValuesView: UIView, LayoutDisplayable {
             subview.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)
         ])
     }
-    
-    func updateValues(){
-        
-    }
 }
 
+// MARK: - Lables
+extension ValuesView {
+    
+    private func updateLabels() {
+        valueLabels.removeAll()
+        rows = layoutType == .row ? 1 : segments.count
+        let fontSize = (max: 30.0, min: 18.0)
+        let size = layoutType == .row ? 30 : fontSize.max - (fontSize.max - fontSize.min)/4 * Double(segments.count)
+        let labelCount = layoutType == .row ? segments.count - segmentIndex : segments.count
+        
+        for row in 0..<rows {
+            var rowLabels: [UILabel] = []
+            for space in 0..<labelCount - row {
+                let label = UILabel()
+                //label.text = "0"
+                label.textAlignment = .right
+                label.textColor = .secondaryLabel
+                label.adjustsFontSizeToFitWidth = true
+                label.minimumScaleFactor = 0.8
+                label.font = .systemFont(ofSize: size, weight: .medium)
+                
+//                if space > 0 {
+//                    updateConstraintsfor(label: label)
+//                }
+                
+                rowLabels.append(label)
+            }
+            valueLabels.append(rowLabels)
+        }
+    }
+    
+    private func updateLablesConstraints() {
+        let spacing: CGFloat = 8
+        let segmentWidth = (bounds.width - spacing * 2) / CGFloat(segments.count)
+        for row in valueLabels {
+            for (index, label) in row.enumerated() {
+                if index > 0 {
+                    label.translatesAutoresizingMaskIntoConstraints = false
+                    label.widthAnchor.constraint(equalToConstant: segmentWidth).isActive = true
+                }
+            }
+        }
+    }
+    
+    private func updateLabelsColor() {
+        if layoutType == .row {
+            valueLabels[0][0].textColor = .label
+        } else if layoutType == .grid {
+            print(segmentIndex)
+            valueLabels[segmentIndex][0].textColor = .label
+            
+        }
+    }
 
-///// Configures a container for numerical results.
-//private func setupValuesView() {
-//    valuesView = UIView()
-//    view.addSubview(valuesView)
-//    valuesView.translatesAutoresizingMaskIntoConstraints = false
-//    valuesView.backgroundColor = .systemBackground
-//    valuesView.layer.cornerRadius = 20
-//    valuesView.layer.shadowColor = UIColor.black.cgColor
-//    valuesView.layer.shadowOpacity = 0.05
-//    valuesView.layer.shadowRadius = 4
-//    valuesView.layer.shadowOffset = CGSize(width: 0, height: 2.5)
-//    
-//    NSLayoutConstraint.activate([
-//        valuesView.topAnchor.constraint(equalTo: periodSegmentedControlBarView.bottomAnchor, constant: 8),
-//        valuesView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-//        valuesView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-//        valuesView.heightAnchor.constraint(equalToConstant: 80)
-//    ])
-//}
-
+    private func updateLabelsValues(){
+        guard let startDate, let endDate else { return }
+        if layoutType == .row {
+            if segments.count == 4 {
+                switch segmentIndex {
+                case 0:
+                    let diff = startDate.getDifference(to: endDate, components: .cYMWD)
+                    let values = [
+                        "\(diff.year ?? 0)",
+                        "\(diff.month ?? 0)",
+                        "\(diff.weekOfMonth ?? 0)",
+                        "\(diff.day ?? 0)"
+                    ]
+                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                        label.text = values[i]
+                    }
+                case 1:
+                    let diff = startDate.getDifference(to: endDate, components: .cMWD)
+                    let values = [
+                        "\(diff.month ?? 0)",
+                        "\(diff.weekOfMonth ?? 0)",
+                        "\(diff.day ?? 0)"
+                    ]
+                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                        label.text = values[i]
+                    }
+                case 2:
+                    let diff = startDate.getDifference(to: endDate, components: .cWD)
+                    let values = [
+                        "\(diff.weekOfYear ?? 0)",
+                        "\(diff.day ?? 0)"
+                    ]
+                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                        label.text = values[i]
+                    }
+                case 3:
+                    let diff = startDate.getDifference(to: endDate, components: .cD)
+                    let values = [
+                        "\(diff.day ?? 0)"
+                    ]
+                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                        label.text = values[i]
+                    }
+                default: break
+                }
+            } else if segments.count == 3 && segments[1] == "Month" {
+                switch segmentIndex {
+                case 0:
+                    let diff = startDate.getDifference(to: endDate, components: .cYMD)
+                    let values = [
+                        "\(diff.year ?? 0)",
+                        "\(diff.month ?? 0)",
+                        "\(diff.day ?? 0)"
+                    ]
+                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                        label.text = values[i]
+                    }
+                case 1:
+                    let diff = startDate.getDifference(to: endDate, components: .cMD)
+                    let values = [
+                        "\(diff.month ?? 0)",
+                        "\(diff.day ?? 0)"
+                    ]
+                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                        label.text = values[i]
+                    }
+                case 2:
+                    let diff = startDate.getDifference(to: endDate, components: .cD)
+                    let values = [
+                        "\(diff.day ?? 0)"
+                    ]
+                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                        label.text = values[i]
+                    }
+                default: break
+                }
+            } else if segments.count == 3 && segments[1] == "Week" {
+                switch segmentIndex {
+                case 0:
+                    let diff = startDate.getDifference(to: endDate, components: .cYWD)
+                    let values = [
+                        "\(diff.year ?? 0)",
+                        "\(diff.weekOfYear ?? 0)",
+                        "\(diff.day ?? 0)"
+                    ]
+                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                        label.text = values[i]
+                    }
+                case 1:
+                    let diff = startDate.getDifference(to: endDate, components: .cWD)
+                    let values = [
+                        "\(diff.weekOfYear ?? 0)",
+                        "\(diff.day ?? 0)"
+                    ]
+                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                        label.text = values[i]
+                    }
+                case 2:
+                    let diff = startDate.getDifference(to: endDate, components: .cD)
+                    let values = [
+                        "\(diff.day ?? 0)"
+                    ]
+                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                        label.text = values[i]
+                    }
+                default: break
+                }
+            } else if segments.count == 2 {
+                switch segmentIndex {
+                case 0:
+                    let diff = startDate.getDifference(to: endDate, components: .cYD)
+                    let values = [
+                        "\(diff.year ?? 0)",
+                        "\(diff.day ?? 0)"
+                    ]
+                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                        label.text = values[i]
+                    }
+                case 1:
+                    let diff = startDate.getDifference(to: endDate, components: .cD)
+                    let values = [
+                        "\(diff.day ?? 0)"
+                    ]
+                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                        label.text = values[i]
+                    }
+                default: break
+                }
+            }
+        } else if layoutType == .grid {
+            var values = [[String]]()
+            if segments.count == 4 {
+                let diff0 = startDate.getDifference(to: endDate, components: .cYMWD)
+                let values0 = [
+                    "\(diff0.year ?? 0)",
+                    "\(diff0.month ?? 0)",
+                    "\(diff0.weekOfMonth ?? 0)",
+                    "\(diff0.day ?? 0)"
+                ]
+                values.append(values0)
+                
+                let diff1 = startDate.getDifference(to: endDate, components: .cMWD)
+                let values1 = [
+                    "\(diff1.month ?? 0)",
+                    "\(diff1.weekOfMonth ?? 0)",
+                    "\(diff1.day ?? 0)"
+                ]
+                values.append(values1)
+                
+                let diff2 = startDate.getDifference(to: endDate, components: .cWD)
+                let values2 = [
+                    "\(diff2.weekOfYear ?? 0)",
+                    "\(diff2.day ?? 0)"
+                ]
+                values.append(values2)
+                
+                let diff3 = startDate.getDifference(to: endDate, components: .cD)
+                let values3 = [
+                    "\(diff3.day ?? 0)"
+                ]
+                values.append(values3)
+                
+                for (rowIndex, rowLable) in valueLabels.enumerated() where rowIndex < values.count {
+                    for (colIndex, label) in rowLable.enumerated() where colIndex < values[rowIndex].count {
+                        label.text = values[rowIndex][colIndex]
+                    }
+                }
+            } else if segments.count == 3 && segments[1] == "Month" {
+                let diff0 = startDate.getDifference(to: endDate, components: .cYMD)
+                let values0 = [
+                    "\(diff0.year ?? 0)",
+                    "\(diff0.month ?? 0)",
+                    "\(diff0.day ?? 0)"
+                ]
+                values.append(values0)
+                
+                let diff1 = startDate.getDifference(to: endDate, components: .cMD)
+                let values1 = [
+                    "\(diff1.month ?? 0)",
+                    "\(diff1.day ?? 0)"
+                ]
+                values.append(values1)
+                
+                let diff2 = startDate.getDifference(to: endDate, components: .cD)
+                let values2 = [
+                    "\(diff2.day ?? 0)"
+                ]
+                values.append(values2)
+                
+                for (rowIndex, rowLable) in valueLabels.enumerated() where rowIndex < values.count {
+                    for (colIndex, label) in rowLable.enumerated() where colIndex < values[rowIndex].count {
+                        label.text = values[rowIndex][colIndex]
+                    }
+                }
+            } else if segments.count == 3 && segments[1] == "Week" {
+                let diff0 = startDate.getDifference(to: endDate, components: .cYWD)
+                let values0 = [
+                    "\(diff0.year ?? 0)",
+                    "\(diff0.weekOfYear ?? 0)",
+                    "\(diff0.day ?? 0)"
+                ]
+                values.append(values0)
+                
+                let diff1 = startDate.getDifference(to: endDate, components: .cWD)
+                let values1 = [
+                    "\(diff1.weekOfYear ?? 0)",
+                    "\(diff1.day ?? 0)"
+                ]
+                values.append(values1)
+                
+                let diff2 = startDate.getDifference(to: endDate, components: .cD)
+                let values2 = [
+                    "\(diff2.day ?? 0)"
+                ]
+                values.append(values2)
+                
+                for (rowIndex, rowLable) in valueLabels.enumerated() where rowIndex < values.count {
+                    for (colIndex, label) in rowLable.enumerated() where colIndex < values[rowIndex].count {
+                        label.text = values[rowIndex][colIndex]
+                    }
+                }
+            } else if segments.count == 2 {
+                let diff0 = startDate.getDifference(to: endDate, components: .cYD)
+                let values0 = [
+                    "\(diff0.year ?? 0)",
+                    "\(diff0.day ?? 0)"
+                ]
+                values.append(values0)
+                
+                let diff1 = startDate.getDifference(to: endDate, components: .cD)
+                let values1 = [
+                    "\(diff1.day ?? 0)"
+                ]
+                values.append(values1)
+                
+                for (rowIndex, rowLable) in valueLabels.enumerated() where rowIndex < values.count {
+                    for (colIndex, label) in rowLable.enumerated() where colIndex < values[rowIndex].count {
+                        label.text = values[rowIndex][colIndex]
+                    }
+                }
+            }
+        }
+    }
+}

@@ -25,20 +25,22 @@ protocol SegmentsUpdatable: AnyObject {
 
 /// Управляет моделью выбора дат и взаимодействием с UI
 final class DateCalculatorViewModel {
-
     
     weak var delegate: DatePickerUpdatable? //уведомляет контроллер об изменнении дат
     weak var segmentsDelegate: SegmentsUpdatable? //уведомляет контроллер об изменнении количества сегментов в periodSegmentedControl
+    weak var valuesDelegate: ValuesViewUpdatable? //
+    
+    
+    let settingsModel: SettingsModel
     
     private(set) var model = DateCalculatorModel()
-    let settingsModel: SettingsModel
     private(set) var visibleSegments: [String]
-    //private(set) var visibleRowLables: [String]
+    
+    var currentSegmentIndex: Int = 0
     
     init(settingsModel: SettingsModel) {
         self.settingsModel = settingsModel
         self.visibleSegments = settingsModel.visibleSegments
-        //self.visibleRowLables = settingsModel.visibleRowLables
         self.settingsModel.delegate = self
     }
     
@@ -48,7 +50,7 @@ final class DateCalculatorViewModel {
         case to
     }
     
-    // MARK: - Handle Picker Change
+    // MARK: - Handle DatePicker Change
     func handleDateChange(_ date: Date, for type: DateType) {
         switch type {
         case .from:
@@ -61,8 +63,11 @@ final class DateCalculatorViewModel {
             updateHoroscopes(for: model.toDates.selectedDate)
         }
         
+        notifyValuesDelegate()
         updateButtonsState(for: type)
+        
         model.log(model.fullDebugInfo)
+        
     }
     
     // MARK: - Navigation
@@ -72,7 +77,9 @@ final class DateCalculatorViewModel {
             updateHoroscopes(for: date)
         }
         
+        notifyValuesDelegate()
         updateButtonsState(for: type)
+        
         model.log(model.fullDebugInfo)
     }
     
@@ -81,7 +88,10 @@ final class DateCalculatorViewModel {
             delegate?.didChangeDate(date, for: type)
             updateHoroscopes(for: date)
         }
+        
+        notifyValuesDelegate()
         updateButtonsState(for: type)
+        
         model.log(model.fullDebugInfo)
     }
     
@@ -90,7 +100,9 @@ final class DateCalculatorViewModel {
         delegate?.didChangeDate(date, for: type)
         updateHoroscopes(for: date)
         
+        notifyValuesDelegate()
         updateButtonsState(for: type)
+        
         model.log(model.fullDebugInfo)
     }
     
@@ -100,12 +112,13 @@ final class DateCalculatorViewModel {
         delegate?.didChangeDate(model.fromDates.selectedDate, for: .from)
         delegate?.didChangeDate(model.toDates.selectedDate, for: .to)
         
+        notifyValuesDelegate()
         updateButtonsState(for: type)
+        
         model.log(model.fullDebugInfo)
     }
     
     func getDates() -> (from: Date, to: Date) {
-        
         (model.fromDates.selectedDate, model.toDates.selectedDate)
     }
     
@@ -138,70 +151,19 @@ final class DateCalculatorViewModel {
         let (western, chinese) = getHoroscopes(for: date)
         delegate?.updateHoroscopes(western: western, chinese: chinese)
     }
+    
+    func notifyValuesDelegate() {
+        let (from, to) = getDates()
+        valuesDelegate?.updateValues(segments: visibleSegments, selectedIndex: currentSegmentIndex, from: from, to: to)
+    }
 }
 
+//MARK: - Delegate
 extension DateCalculatorViewModel: SettingsDelegate {
     func settingsDidUpdate(_ settings: SettingsModel) {
         visibleSegments = settings.visibleSegments
         segmentsDelegate?.updateSegments(visibleSegments)
-        //segmentsDelegate?.updateValuesView(visibleRowLables)
+        //notifyValuesDelegate()
     }
     
 }
-
-//extension DateCalculatorViewModel {
-//    
-//    enum viewMode {
-//        case full
-//        case yearMonthDay
-//        case yearWeekDay
-//        case yearDay
-//        
-////        enum selectedSegment {
-////            case year
-////            case month
-////            case week
-////            case day
-////        }
-//        
-//        func getValues(selectedSegment: Int, selectedDate: Date, toDate: Date) -> DateComponents {
-//            switch self {
-//            case .full:
-//                switch selectedSegment {
-//                    case 0: return selectedDate.getDifference(to: toDate, components: .yearComponents)
-//                    case 1: return selectedDate.getDifference(to: toDate, components: .monthComponents)
-//                    case 2: return selectedDate.getDifference(to: toDate, components: .weekComponents)
-//                    case 3: return selectedDate.getDifference(to: toDate, components: .dayComponents)
-//                }
-//            case .yearMonthDay
-//                
-//                return [currentDateType.getDifference(to: .now, components: .yearComponents)]
-//            case .yearMonthDay:
-//                return [currentDateType.getDifference(to: .now, components: .yearComponents),
-//                        currentDateType.getDifference(to: .now, components: .monthComponents),
-//            }
-//        }
-//        
-//        
-//        func currentViewMode () {
-//            switch self {
-//            case .full: return .yearDay
-//            case 3:
-//                let isMonth = self == "Month"
-//                return isMonth ? .yearMonthDay : .yearWeekDay
-//            default: return .full
-//                
-//            }
-//        }
-//        
-//    }
-//    
-//    
-//}
-
-//func updateRowLabelsValues() {
-//        let segment = periodSegmentedControl.selectedSegmentIndex
-//        let valueseArray = viewModel.viewMode.getValues(selectedSegment: segment, currentDateType: currentDateType)
-//        for index in valueLabels {
-//            valueLabels[index] = valueseArray[index]
-//        }

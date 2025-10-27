@@ -112,14 +112,19 @@ extension Date {
 extension Date {
     
     enum Components {
-        case yearComponents, monthComponents, weekComponents, dayComponents
+        case cYMWD, cYMD, cYWD, cMWD, cYD, cMD, cWD, cD
         
         fileprivate var values: Set<Calendar.Component> {
             switch self {
-            case .yearComponents: return [.year, .month, .weekOfMonth, .day]
-            case .monthComponents: return [.month, .weekOfMonth, .day]
-            case .weekComponents: return [.weekOfYear, .day]
-            case .dayComponents: return [.day]
+            case .cYMWD: return [.year, .month, .weekOfMonth, .day]
+            case .cYMD: return [.year, .month, .day]
+            case .cYWD: return [.year, .weekOfYear, .day]
+            case .cMWD: return [.month, .weekOfMonth, .day]
+            case .cYD: return [.year, .day]
+            case .cMD: return [.month, .day]
+            case .cWD: return [.weekOfYear, .day]
+            case .cD: return [.day]
+            
             }
         }
     }
