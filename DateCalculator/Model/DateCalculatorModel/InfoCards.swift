@@ -29,7 +29,7 @@ final class InfoCards {
             case .western:    return  C.Cards.innuendo//.tertiarySystemBackground//C.Cards.cityLights//.secondarySystemBackground //.systemGray6
             case .chinese:    return  C.Cards.selectedBlue///.systemBlue.withAlphaComponent(0.12) //UIColor(red: 0.96, green: 0.96, blue: 0.98, alpha: 1.00)// UIColor(red: 0.78, green: 0.84, blue: 0.90, alpha: 0.70) //.systemGreen.withAlphaComponent(0.12)
             case .year:       return  C.Cards.sourLemon//.systemYellow.withAlphaComponent(0.15) //UIColor(red: 0.97, green: 0.95, blue: 0.89, alpha: 1.00) //.systemYellow.withAlphaComponent(0.15)
-            case .statistics: return  .white//.tertiarySystemBackground //.white
+            case .statistics: return  .tertiarySystemBackground //.white
             }
         }
     }
@@ -76,7 +76,7 @@ final class InfoCards {
         }
         
         private func setupLabels() {
-            titleLabel.font = .systemFont(ofSize: 12, weight: .regular)
+            titleLabel.font = .systemFont(ofSize: 12, weight: .medium)
             titleLabel.textAlignment = .center
             titleLabel.textColor = .secondaryLabel
             
@@ -240,9 +240,9 @@ final class InfoCards {
         }
         
         private func setupLabels() {
-            titleLabel.font = .systemFont(ofSize: 12, weight: .regular)
+            titleLabel.font = .systemFont(ofSize: 12, weight: .medium)
             titleLabel.textAlignment = .center
-            titleLabel.textColor = .secondaryLabel
+            titleLabel.textColor = .label//.secondaryLabel
             
             [name1Label, name2Label, name3Label].forEach {
                 $0.font = .systemFont(ofSize: 13, weight: .regular)

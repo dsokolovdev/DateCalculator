@@ -7,6 +7,7 @@
 
 import UIKit
 
+//StartButton, Endbutton, TodayButton, BackButton, ForwardButton, SwapButton animation
 final class AnimatedBarButtonItem: UIBarButtonItem {
     override var isEnabled: Bool {
         didSet {
@@ -14,7 +15,7 @@ final class AnimatedBarButtonItem: UIBarButtonItem {
             UIView.transition(with: view,
                               duration: 0.25,
                               options: [.transitionCrossDissolve, .allowUserInteraction]) {
-                view.alpha = self.isEnabled ? 1.0 : 0.5
+                //view.alpha = self.isEnabled ? 1.0 : 0.5
             }
         }
     }
@@ -30,6 +31,7 @@ final class AnimatedBarButtonItem: UIBarButtonItem {
     }
 }
 
+//ValueView labels animation
 final class AnimatedLabel: UILabel {
     override var text: String? {
         didSet {
@@ -43,13 +45,14 @@ final class AnimatedLabel: UILabel {
 }
 
 
+//Reset button annimation (in Settings VC)
 final class AnimatedButton: UIButton {
     override var isEnabled: Bool {
         didSet {
             UIView.transition(with: self,
                               duration: 0.25,
                               options: [.transitionCrossDissolve, .allowUserInteraction]) {
-                self.alpha = self.isEnabled ? 1.0 : 0.0
+                //self.alpha = self.isEnabled ? 1.0 : 0.5
             }
         }
     }

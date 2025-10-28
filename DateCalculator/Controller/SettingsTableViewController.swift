@@ -113,11 +113,10 @@ extension SettingsTableViewController {
             
             // Add UIButton for actions (e.g. Reset)
         } else if let buttonItem = item as? ButtonItem {
-            let button = UIButton(type: .system)
+            let button = AnimatedButton(type: .system)
             button.setTitle(buttonItem.buttonTitle, for: .normal)
             button.tag = indexPath.section * 100 + indexPath.row
             button.isEnabled = buttonItem.isEnabled
-            button.alpha = buttonItem.isEnabled ? 1.0 : 0.5
             button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
             button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
             button.contentHorizontalAlignment = .right
@@ -212,12 +211,8 @@ extension SettingsTableViewController {
               let button = cell.accessoryView as? UIButton else {
             return
         }
-
-        UIView.transition(with: button,
-                          duration: 0.25,
-                          options: [.transitionCrossDissolve, .allowUserInteraction]) {
-            button.isEnabled = enabled
-            button.alpha = enabled ? 1.0 : 0.5
-        }
+        
+        button.isEnabled = enabled
+        //button.alpha = enabled ? 1.0 : 0.5
     }
 }
