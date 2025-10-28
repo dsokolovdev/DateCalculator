@@ -30,8 +30,8 @@
             filePath = "DateCalculator/Controller/DateCalculatorViewController.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "837"
-            endingLineNumber = "837"
+            startingLineNumber = "841"
+            endingLineNumber = "841"
             landmarkName = "updateSegments(_:)"
             landmarkType = "7">
          </BreakpointContent>

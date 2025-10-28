@@ -7,6 +7,8 @@
 
 import Foundation
 
+//MARK: - Common types used in different classes
+//Notify ValuesView about layoytType selected in DateCalculatorViewModel
 protocol LayoutDisplayable: AnyObject {
     var layoutType: LayoutType { get set }
     //var segmentIndex: Int { get set }
@@ -23,9 +25,4 @@ enum LayoutType: String {
         case .grid: return "circle.grid.3x3.fill"
         }
     }
-}
-
-//
-protocol ValuesViewUpdatable: AnyObject {
-    func updateValues(segments: [String], selectedIndex: Int, from start: Date, to end: Date)
 }

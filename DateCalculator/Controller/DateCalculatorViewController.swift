@@ -70,9 +70,10 @@ final class DateCalculatorViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel.delegate = self
+        viewModel.datePickerDelegate = self
         viewModel.segmentsDelegate = self
         viewModel.valuesDelegate = valuesView
+        //viewModel.animationDelegate = self
         
         view.backgroundColor = .systemBackground
         title = K.Titles.appName
@@ -372,9 +373,9 @@ extension DateCalculatorViewController {
         todayButton = UIBarButtonItem()
         forwardButton = UIBarButtonItem()
         
-        backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(goBack))
-        todayButton = UIBarButtonItem(title: "Today", style: .plain, target: self, action: #selector(goToday))
-        forwardButton = UIBarButtonItem(image: UIImage(systemName: "chevron.forward"), style: .plain, target: self, action: #selector(goForward))
+        backButton = AnimatedBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .plain, target: self, action: #selector(goBack))
+        todayButton = AnimatedBarButtonItem(title: "Today", style: .plain, target: self, action: #selector(goToday))
+        forwardButton = AnimatedBarButtonItem(image: UIImage(systemName: "chevron.forward"), style: .plain, target: self, action: #selector(goForward))
 
         todayButton.isEnabled = false
         todayButton.setTitleTextAttributes([.foregroundColor: UIColor.secondaryLabel], for: .disabled)
@@ -431,11 +432,10 @@ extension DateCalculatorViewController {
         datesToolbar.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(datesToolbar)
 
-        startButton = UIBarButtonItem(title: startDate.readableFormat, style: .plain, target: self, action: #selector(selectStartDate))
-        endButton = UIBarButtonItem(title: endDate.readableFormat, style: .plain, target: self, action: #selector(selectEndDate))
+        startButton = AnimatedBarButtonItem(title: startDate.readableFormat, style: .plain, target: self, action: #selector(selectStartDate))
+        endButton = AnimatedBarButtonItem(title: endDate.readableFormat, style: .plain, target: self, action: #selector(selectEndDate))
         
-        
-        swapButton = UIBarButtonItem(
+        swapButton = AnimatedBarButtonItem(
             image: UIImage(systemName: "arrow.left.arrow.right"),
             style: .plain,
             target: self,
@@ -705,14 +705,16 @@ extension DateCalculatorViewController {
 extension DateCalculatorViewController {
 
     @objc private func dateChanged(_ sender: UIDatePicker) {
-        UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { [self] in
-            viewModel.handleDateChange(sender.date, for: currentDateType)
+        viewModel.handleDateChange(sender.date, for: currentDateType)
+        
+        //UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { }
+            
             
             //UIView.transition(with: valuesView, duration: 0.25, options: [.transitionCrossDissolve]) { }
             //updateValuesView()
 
             //viewModel.notifyValuesDelegate()
-        }
+        
     }
     
 //    func updateValuesView() {
@@ -754,7 +756,7 @@ extension DateCalculatorViewController {
     @objc private func goBack() {
         impactFeedback.impactOccurred()
         print("← Previous date")
-        UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { }
+        //UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { }
         //UIView.transition(with: valuesView, duration: 0.25, options: [.transitionCrossDissolve]) { }
         viewModel.goBack(for: currentDateType)
         datePicker.setDate(currentDateType == .from ? startDate : endDate, animated: true)
@@ -765,7 +767,7 @@ extension DateCalculatorViewController {
     @objc private func goToday() {
         impactFeedback.impactOccurred()
         print(" Today")
-        UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { }
+        //UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { }
         //UIView.transition(with: valuesView, duration: 0.25, options: [.transitionCrossDissolve]) { }
         viewModel.goToToday(for: currentDateType)
         datePicker.setDate(currentDateType == .from ? startDate : endDate, animated: true)
@@ -776,7 +778,7 @@ extension DateCalculatorViewController {
     @objc private func goForward() {
         impactFeedback.impactOccurred()
         print("→ Next date")
-        UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { }
+        //UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { }
         //UIView.transition(with: valuesView, duration: 0.25, options: [.transitionCrossDissolve]) { }
         viewModel.goForward(for: currentDateType)
         datePicker.setDate(currentDateType == .from ? startDate : endDate, animated: true)
@@ -795,6 +797,8 @@ extension DateCalculatorViewController: DatePickerUpdatable {
         case .to:
             endButton.title = formatted
         }
+        
+        //animateValueLabelsChange()
     }
     
     func updateHoroscopes(for date: Date, western: WesternHoroscope, chinese: ChineseHoroscope) {
@@ -852,6 +856,16 @@ extension UIImage {
     }
     
 }
+
+
+//extension DateCalculatorViewController {
+//    func animateValueLabelsChange() {
+//        UIView.transition(with: valuesView, duration: 0.25, options: [.transitionCrossDissolve]) { }
+//        UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { self.datesToolbar.layoutIfNeeded()}
+//        //UIView.transition(with: bottomToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { }
+//        //UIView.transition(with: infoScrollView, duration: 0.25, options: [.transitionCrossDissolve]) { }
+//    }
+//}
 
 //// MARK: - Infinite Scroll for InfoCards
 //extension DateCalculatorViewController: UIScrollViewDelegate {

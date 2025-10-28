@@ -7,6 +7,7 @@
 
 import Foundation
 
+//MARK: - DateCalculator Model
 /// Основная модель, которая хранит и управляет данными выбора дат.
 struct DateCalculatorModel {
 #if DEBUG

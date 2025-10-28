@@ -7,6 +7,7 @@
 
 import Foundation
 
+//MARK: - Western Horoscope Structure
 struct WesternHoroscope {
     
     // MARK: - Zodiac Signs

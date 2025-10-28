@@ -9,13 +9,15 @@
 //  Handles switch state changes, reset actions, persistence, and footer text generation.
 //
 
-import Foundation
+import UIKit
 
-//inform about changes in switches
+//MARK: - Protocols
+//Inform DateCalculatorViewModel about changes after switch is toggled or Reset button is pressed
 protocol SettingsDelegate: AnyObject {
     func settingsDidUpdate(_ settings: SettingsModel)
 }
 
+//MARK: - Setting Model
 /// The view model that manages all logic for the Settings screen.
 /// Controls switch states, reset actions, and persistence using UserDefaults.
 final class SettingsModel {
@@ -43,6 +45,10 @@ final class SettingsModel {
         loadSavedSwitchStates()
         updateResetButtonState()
     }
+    
+    func updateButtonItem(_ updatedItem: ButtonItem, at indexPath: IndexPath) {
+            settings.sections[indexPath.section].items[indexPath.row] = updatedItem
+        }
     
     // MARK: - Static Footer
     
@@ -111,7 +117,7 @@ final class SettingsModel {
                 }
             }
         }
-        
+
         if var buttonItem = sections.last?.items.first as? ButtonItem {
             buttonItem.changeButtonState(to: shouldEnable)
             sections[sections.count - 1].items[0] = buttonItem

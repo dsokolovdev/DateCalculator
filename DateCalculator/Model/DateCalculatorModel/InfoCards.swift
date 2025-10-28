@@ -26,10 +26,10 @@ final class InfoCards {
         
         var backgroundColor: UIColor {
             switch self {
-            case .western:    return .secondarySystemBackground //.systemGray6
-            case .chinese:    return .systemBlue.withAlphaComponent(0.12) //UIColor(red: 0.96, green: 0.96, blue: 0.98, alpha: 1.00)// UIColor(red: 0.78, green: 0.84, blue: 0.90, alpha: 0.70) //.systemGreen.withAlphaComponent(0.12)
-            case .year:       return .systemYellow.withAlphaComponent(0.15) //UIColor(red: 0.97, green: 0.95, blue: 0.89, alpha: 1.00) //.systemYellow.withAlphaComponent(0.15)
-            case .statistics: return .tertiarySystemBackground //.white
+            case .western:    return  C.Cards.innuendo//.tertiarySystemBackground//C.Cards.cityLights//.secondarySystemBackground //.systemGray6
+            case .chinese:    return  C.Cards.selectedBlue///.systemBlue.withAlphaComponent(0.12) //UIColor(red: 0.96, green: 0.96, blue: 0.98, alpha: 1.00)// UIColor(red: 0.78, green: 0.84, blue: 0.90, alpha: 0.70) //.systemGreen.withAlphaComponent(0.12)
+            case .year:       return  C.Cards.sourLemon//.systemYellow.withAlphaComponent(0.15) //UIColor(red: 0.97, green: 0.95, blue: 0.89, alpha: 1.00) //.systemYellow.withAlphaComponent(0.15)
+            case .statistics: return  .white//.tertiarySystemBackground //.white
             }
         }
     }

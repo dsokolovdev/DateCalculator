@@ -7,6 +7,7 @@
 
 import Foundation
 
+//MARK: - Western Horoscope Structure
 struct ChineseHoroscope {
     
     // MARK: - Zodiac (12 животных)

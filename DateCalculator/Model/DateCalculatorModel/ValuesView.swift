@@ -7,6 +7,7 @@
 
 import UIKit
 
+//MARK: - Values View
 final class ValuesView: UIView, LayoutDisplayable {
 
     // MARK: - Public Properties
@@ -162,7 +163,7 @@ extension ValuesView {
         for row in 0..<rows {
             var rowLabels: [UILabel] = []
             for _ in 0..<labelCount - row {
-                let label = UILabel()
+                let label = AnimatedLabel()
                 //label.text = "0"
                 label.textAlignment = .right
                 label.textColor = UIColor.label.withAlphaComponent(0.6)
@@ -208,6 +209,164 @@ extension ValuesView {
         }
     }
 
+//    private func updateLabelsValues() {
+//        guard let startDate, let endDate else { return }
+//        updateDirectionIcon()
+//        // вспомогательный короткий форматтер
+//        func f(_ value: Int?) -> String {
+//            guard let v = value else { return "0" }
+//            return abs(v).formatted(.number)
+//        }
+//        
+//        func animateLabelTextChange(_ label: UILabel, newText: String) {
+//            guard label.text != newText else { return }
+//            UIView.transition(with: label, duration: 0.25, options: [.transitionCrossDissolve, .allowUserInteraction], animations: { label.text = newText }, completion: nil)
+//        }
+//        
+//        if layoutType == .row {
+//            if segments.count == 4 {
+//                switch segmentIndex {
+//                case 0:
+//                    let diff = startDate.getDifference(to: endDate, components: .cYMWD)
+//                    let values = [f(diff.year), f(diff.month), f(diff.weekOfMonth), f(diff.day)]
+//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+//                        animateLabelTextChange(label, newText: values[i])
+//                    }
+//                case 1:
+//                    let diff = startDate.getDifference(to: endDate, components: .cMWD)
+//                    let values = [f(diff.month), f(diff.weekOfMonth), f(diff.day)]
+//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+//                        animateLabelTextChange(label, newText: values[i])
+//                    }
+//                case 2:
+//                    let diff = startDate.getDifference(to: endDate, components: .cWD)
+//                    let values = [f(diff.weekOfYear), f(diff.day)]
+//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+//                        animateLabelTextChange(label, newText: values[i])
+//                    }
+//                case 3:
+//                    let diff = startDate.getDifference(to: endDate, components: .cD)
+//                    let values = [f(diff.day)]
+//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+//                        animateLabelTextChange(label, newText: values[i])
+//                    }
+//                default: break
+//                }
+//            } else if segments.count == 3 && segments[1] == "Month" {
+//                switch segmentIndex {
+//                case 0:
+//                    let diff = startDate.getDifference(to: endDate, components: .cYMD)
+//                    let values = [f(diff.year), f(diff.month), f(diff.day)]
+//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+//                        animateLabelTextChange(label, newText: values[i])
+//                    }
+//                case 1:
+//                    let diff = startDate.getDifference(to: endDate, components: .cMD)
+//                    let values = [f(diff.month), f(diff.day)]
+//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+//                        animateLabelTextChange(label, newText: values[i])
+//                    }
+//                case 2:
+//                    let diff = startDate.getDifference(to: endDate, components: .cD)
+//                    let values = [f(diff.day)]
+//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+//                        animateLabelTextChange(label, newText: values[i])
+//                    }
+//                default: break
+//                }
+//            } else if segments.count == 3 && segments[1] == "Week" {
+//                switch segmentIndex {
+//                case 0:
+//                    let diff = startDate.getDifference(to: endDate, components: .cYWD)
+//                    let values = [f(diff.year), f(diff.weekOfYear), f(diff.day)]
+//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+//                        animateLabelTextChange(label, newText: values[i])
+//                    }
+//                case 1:
+//                    let diff = startDate.getDifference(to: endDate, components: .cWD)
+//                    let values = [f(diff.weekOfYear), f(diff.day)]
+//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+//                        animateLabelTextChange(label, newText: values[i])
+//                    }
+//                case 2:
+//                    let diff = startDate.getDifference(to: endDate, components: .cD)
+//                    let values = [f(diff.day)]
+//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+//                        animateLabelTextChange(label, newText: values[i])
+//                    }
+//                default: break
+//                }
+//            } else if segments.count == 2 {
+//                switch segmentIndex {
+//                case 0:
+//                    let diff = startDate.getDifference(to: endDate, components: .cYD)
+//                    let values = [f(diff.year), f(diff.day)]
+//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+//                        animateLabelTextChange(label, newText: values[i])
+//                    }
+//                case 1:
+//                    let diff = startDate.getDifference(to: endDate, components: .cD)
+//                    let values = [f(diff.day)]
+//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+//                        animateLabelTextChange(label, newText: values[i])
+//                    }
+//                default: break
+//                }
+//            }
+//        } else if layoutType == .grid {
+//            var values = [[String]]()
+//            
+//            if segments.count == 4 {
+//                let diff0 = startDate.getDifference(to: endDate, components: .cYMWD)
+//                values.append([f(diff0.year), f(diff0.month), f(diff0.weekOfMonth), f(diff0.day)])
+//                
+//                let diff1 = startDate.getDifference(to: endDate, components: .cMWD)
+//                values.append([f(diff1.month), f(diff1.weekOfMonth), f(diff1.day)])
+//                
+//                let diff2 = startDate.getDifference(to: endDate, components: .cWD)
+//                values.append([f(diff2.weekOfYear), f(diff2.day)])
+//                
+//                let diff3 = startDate.getDifference(to: endDate, components: .cD)
+//                values.append([f(diff3.day)])
+//                
+//            } else if segments.count == 3 && segments[1] == "Month" {
+//                let diff0 = startDate.getDifference(to: endDate, components: .cYMD)
+//                values.append([f(diff0.year), f(diff0.month), f(diff0.day)])
+//                
+//                let diff1 = startDate.getDifference(to: endDate, components: .cMD)
+//                values.append([f(diff1.month), f(diff1.day)])
+//                
+//                let diff2 = startDate.getDifference(to: endDate, components: .cD)
+//                values.append([f(diff2.day)])
+//                
+//            } else if segments.count == 3 && segments[1] == "Week" {
+//                let diff0 = startDate.getDifference(to: endDate, components: .cYWD)
+//                values.append([f(diff0.year), f(diff0.weekOfYear), f(diff0.day)])
+//                
+//                let diff1 = startDate.getDifference(to: endDate, components: .cWD)
+//                values.append([f(diff1.weekOfYear), f(diff1.day)])
+//                
+//                let diff2 = startDate.getDifference(to: endDate, components: .cD)
+//                values.append([f(diff2.day)])
+//                
+//            } else if segments.count == 2 {
+//                let diff0 = startDate.getDifference(to: endDate, components: .cYD)
+//                values.append([f(diff0.year), f(diff0.day)])
+//                
+//                let diff1 = startDate.getDifference(to: endDate, components: .cD)
+//                values.append([f(diff1.day)])
+//            }
+//            
+//            // применяем к меткам
+//            for (rowIndex, rowLabels) in valueLabels.enumerated() where rowIndex < values.count {
+//                for (colIndex, label) in rowLabels.enumerated() where colIndex < values[rowIndex].count {
+//                    animateLabelTextChange(label, newText: values[rowIndex][colIndex])
+//                }
+//            }
+//        }
+//    }
+//}
+
     private func updateLabelsValues() {
         guard let startDate, let endDate else { return }
         updateDirectionIcon()
@@ -217,11 +376,6 @@ extension ValuesView {
             return abs(v).formatted(.number)
         }
         
-        func animateLabelTextChange(_ label: UILabel, newText: String) {
-            guard label.text != newText else { return }
-            UIView.transition(with: label, duration: 0.25, options: [.transitionCrossDissolve, .allowUserInteraction], animations: { label.text = newText }, completion: nil)
-        }
-        
         if layoutType == .row {
             if segments.count == 4 {
                 switch segmentIndex {
@@ -229,25 +383,25 @@ extension ValuesView {
                     let diff = startDate.getDifference(to: endDate, components: .cYMWD)
                     let values = [f(diff.year), f(diff.month), f(diff.weekOfMonth), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        animateLabelTextChange(label, newText: values[i])
+                        label.text = values[i]
                     }
                 case 1:
                     let diff = startDate.getDifference(to: endDate, components: .cMWD)
                     let values = [f(diff.month), f(diff.weekOfMonth), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        animateLabelTextChange(label, newText: values[i])
+                        label.text = values[i]
                     }
                 case 2:
                     let diff = startDate.getDifference(to: endDate, components: .cWD)
                     let values = [f(diff.weekOfYear), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        animateLabelTextChange(label, newText: values[i])
+                        label.text = values[i]
                     }
                 case 3:
                     let diff = startDate.getDifference(to: endDate, components: .cD)
                     let values = [f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        animateLabelTextChange(label, newText: values[i])
+                        label.text = values[i]
                     }
                 default: break
                 }
@@ -257,19 +411,19 @@ extension ValuesView {
                     let diff = startDate.getDifference(to: endDate, components: .cYMD)
                     let values = [f(diff.year), f(diff.month), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        animateLabelTextChange(label, newText: values[i])
+                        label.text = values[i]
                     }
                 case 1:
                     let diff = startDate.getDifference(to: endDate, components: .cMD)
                     let values = [f(diff.month), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        animateLabelTextChange(label, newText: values[i])
+                        label.text = values[i]
                     }
                 case 2:
                     let diff = startDate.getDifference(to: endDate, components: .cD)
                     let values = [f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        animateLabelTextChange(label, newText: values[i])
+                        label.text = values[i]
                     }
                 default: break
                 }
@@ -279,19 +433,19 @@ extension ValuesView {
                     let diff = startDate.getDifference(to: endDate, components: .cYWD)
                     let values = [f(diff.year), f(diff.weekOfYear), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        animateLabelTextChange(label, newText: values[i])
+                        label.text = values[i]
                     }
                 case 1:
                     let diff = startDate.getDifference(to: endDate, components: .cWD)
                     let values = [f(diff.weekOfYear), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        animateLabelTextChange(label, newText: values[i])
+                        label.text = values[i]
                     }
                 case 2:
                     let diff = startDate.getDifference(to: endDate, components: .cD)
                     let values = [f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        animateLabelTextChange(label, newText: values[i])
+                        label.text = values[i]
                     }
                 default: break
                 }
@@ -301,13 +455,13 @@ extension ValuesView {
                     let diff = startDate.getDifference(to: endDate, components: .cYD)
                     let values = [f(diff.year), f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        animateLabelTextChange(label, newText: values[i])
+                        label.text = values[i]
                     }
                 case 1:
                     let diff = startDate.getDifference(to: endDate, components: .cD)
                     let values = [f(diff.day)]
                     for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        animateLabelTextChange(label, newText: values[i])
+                        label.text = values[i]
                     }
                 default: break
                 }
@@ -359,13 +513,13 @@ extension ValuesView {
             // применяем к меткам
             for (rowIndex, rowLabels) in valueLabels.enumerated() where rowIndex < values.count {
                 for (colIndex, label) in rowLabels.enumerated() where colIndex < values[rowIndex].count {
-                    animateLabelTextChange(label, newText: values[rowIndex][colIndex])
+                    label.text = values[rowIndex][colIndex]
                 }
             }
         }
     }
 }
-
+    
 extension ValuesView {
     private func setupDirectionView() {
         addSubview(directionView)

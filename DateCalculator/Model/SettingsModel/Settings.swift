@@ -12,7 +12,6 @@
 import Foundation
 
 // MARK: - Protocols
-
 /// A base protocol for all setting items.
 /// Each item must have a `name` used as an identifier or display label.
 protocol SettingsProtocol {
@@ -24,8 +23,7 @@ protocol SettingsActionDeleagate: AnyObject {
     func resetToDefaults()
 }
 
-// MARK: - Settings Data Model
-
+// MARK: - Settings Data Structure
 /// Represents the complete configuration of the Settings screen,
 /// including sections and an optional footer text.
 struct Settings {
@@ -69,7 +67,6 @@ struct SwitchItem: SettingsProtocol {
 }
 
 // MARK: - Button Item
-
 /// Represents a button-type setting (e.g., “Reset to Defaults”).
 struct ButtonItem: SettingsProtocol {
     /// The display name of the button.
@@ -79,7 +76,7 @@ struct ButtonItem: SettingsProtocol {
     let buttonTitle: String
     
     /// Whether the button is currently enabled or disabled.
-    var isEnabled: Bool
+    var isEnabled: Bool 
     
     /// Delegate responsible for performing the associated action.
     var delegate: SettingsActionDeleagate?
