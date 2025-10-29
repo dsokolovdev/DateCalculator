@@ -28,6 +28,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // 4️⃣ Оборачиваем в UINavigationController
         let navController = UINavigationController(rootViewController: dateCalculatorVC)
+        
+//        // 🌈 Настраиваем общий фон
+//            let backgroundColor = UIColor { trait in
+//                trait.userInterfaceStyle == .dark
+//                ? UIColor(red: 0.13, green: 0.16, blue: 0.20, alpha: 1.0) // 🌙 #222A33
+//                : UIColor(red: 0.98, green: 0.99, blue: 1.00, alpha: 1.0) // ☀️ #FAFDFF
+//            }
+//
+//            navController.view.backgroundColor = backgroundColor
+//            dateCalculatorVC.view.backgroundColor = backgroundColor
+//            UINavigationBar.appearance().barTintColor = backgroundColor
+//            UINavigationBar.appearance().backgroundColor = backgroundColor
 
         // 5️⃣ Создаём окно
         let window = UIWindow(windowScene: windowScene)

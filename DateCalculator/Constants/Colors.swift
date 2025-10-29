@@ -27,6 +27,15 @@ struct C {
         }
     }
     
+    static let royalBlue = UIColor { trait in
+        if trait.userInterfaceStyle == .dark {
+            return UIColor(red: 0.24, green: 0.36, blue: 0.61, alpha: 1.00)
+        } else {
+            return UIColor(red: 0.22, green: 0.40, blue: 0.84, alpha: 1.00)
+        }
+    }
+    
+    
     struct Cards {
         static let sourLemon = UIColor { trait in
             if trait.userInterfaceStyle == .dark {
@@ -51,6 +60,13 @@ struct C {
                 return UIColor(red: 0.70, green: 0.84, blue: 1.00, alpha: 0.60) //blue *
             }
         }
+        
+        static let customYellow = UIColor(red: 1.00, green: 0.96, blue: 0.77, alpha: 1.00)
+        static let customGreen = UIColor(red: 0.70, green: 0.86, blue: 0.82, alpha: 1.00)
+        static let customPurple = UIColor(red: 0.86, green: 0.75, blue: 0.90, alpha: 1.00)
+        static let customBlue = UIColor(red: 0.77, green: 0.86, blue: 0.96, alpha: 1.00)
+        static let customGrey = UIColor(red: 0.92, green: 0.95, blue: 0.98, alpha: 1.00)
+        static let customPurpleLight = UIColor(red: 0.95, green: 0.90, blue: 0.99, alpha: 1.00)
 
         
         static let waterfall = UIColor(red: 0.22, green: 0.68, blue: 0.66, alpha: 0.40) //green *

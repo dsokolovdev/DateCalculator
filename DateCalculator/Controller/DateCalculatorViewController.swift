@@ -70,6 +70,8 @@ final class DateCalculatorViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        //view.backgroundColor = UIColor(red: 0.87, green: 0.89, blue: 0.94, alpha: 1.0) //UIColor(red: 0.96, green: 0.97, blue: 0.98, alpha: 1.0)
+        //navigationController?.view.backgroundColor = UIColor(red: 0.87, green: 0.89, blue: 0.94, alpha: 1.0)
         viewModel.datePickerDelegate = self
         viewModel.segmentsDelegate = self
         viewModel.valuesDelegate = valuesView
@@ -725,6 +727,20 @@ extension DateCalculatorViewController {
         print(currentDateType)
         startButton.tintColor = currentDateType == .from ? .systemBlue : .secondaryLabel
         endButton.tintColor = currentDateType == .to ? .systemBlue : .secondaryLabel
+        
+//        let activeColor = C.royalBlue
+//        let inactiveColor = UIColor.secondaryLabel
+//        let activeFont = UIFont.systemFont(ofSize: 17, weight: .medium)
+//        let inactiveFont = UIFont.systemFont(ofSize: 17, weight: .regular)
+//        
+//        // активная
+//        if currentDateType == .from {
+//            startButton.setTitleTextAttributes([.foregroundColor: activeColor, .font: activeFont], for: .normal)
+//            endButton.setTitleTextAttributes([.foregroundColor: inactiveColor, .font: inactiveFont], for: .normal)
+//        } else {
+//            startButton.setTitleTextAttributes([.foregroundColor: inactiveColor, .font: inactiveFont], for: .normal)
+//            endButton.setTitleTextAttributes([.foregroundColor: activeColor, .font: activeFont], for: .normal)
+//        }
         
         
     }
