@@ -309,8 +309,8 @@ extension DateCalculatorViewController {
         periodSegmentedControlBarView = UIView()
         periodSegmentedControlBarView.translatesAutoresizingMaskIntoConstraints = false
         periodSegmentedControlBarView.backgroundColor = .systemBackground
-        //barView.layer.borderColor = UIColor.systemGray5.cgColor
-        //barView.layer.borderWidth = 0.5
+        //periodSegmentedControlBarView.layer.borderColor = UIColor.tertiaryLabel.cgColor //UIColor.systemGray5.cgColor
+        //periodSegmentedControlBarView.layer.borderWidth = 0.5
         periodSegmentedControlBarView.layer.cornerRadius = 20
         view.addSubview(periodSegmentedControlBarView)
         
@@ -323,12 +323,18 @@ extension DateCalculatorViewController {
 
         // Создаём Segmented Control
         let items = ["Year", "Month", "Week", "Day"]
+        let activeColor = C.mazarineBlue
+        let inactiveColor = UIColor.secondaryLabel
+        let activeFont = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        let inactiveFont = UIFont.systemFont(ofSize: 14, weight: .medium)
         periodSegmentedControl = UISegmentedControl(items: items)
         periodSegmentedControl.selectedSegmentIndex = 1
         periodSegmentedControl.translatesAutoresizingMaskIntoConstraints = false
         periodSegmentedControl.selectedSegmentTintColor = .systemGray6
-        periodSegmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.secondaryLabel], for: .normal)
-        periodSegmentedControl.setTitleTextAttributes([.foregroundColor: C.mazarineBlue], for: .selected)
+        periodSegmentedControl.setTitleTextAttributes([.foregroundColor: inactiveColor, .font: inactiveFont], for: .normal)
+        periodSegmentedControl.setTitleTextAttributes([.foregroundColor: activeColor, .font: activeFont], for: .selected)
+        //periodSegmentedControl.setTitleTextAttributes([.foregroundColor: inactiveColor], for: .normal)
+        //periodSegmentedControl.setTitleTextAttributes([.foregroundColor: activeColor], for: .selected)
         periodSegmentedControl.subviews.forEach { $0.backgroundColor = .systemBackground }
         periodSegmentedControl.addTarget(self, action: #selector(periodChanged(_:)), for: .valueChanged)
 
@@ -725,22 +731,22 @@ extension DateCalculatorViewController {
 
     private func highlightActiveButton() {
         print(currentDateType)
-        startButton.tintColor = currentDateType == .from ? .systemBlue : .secondaryLabel
-        endButton.tintColor = currentDateType == .to ? .systemBlue : .secondaryLabel
+//        startButton.tintColor = currentDateType == .from ? C.merchantMarineBlue : .secondaryLabel
+//        endButton.tintColor = currentDateType == .to ? C.merchantMarineBlue : .secondaryLabel
         
-//        let activeColor = C.royalBlue
-//        let inactiveColor = UIColor.secondaryLabel
-//        let activeFont = UIFont.systemFont(ofSize: 17, weight: .medium)
-//        let inactiveFont = UIFont.systemFont(ofSize: 17, weight: .regular)
-//        
-//        // активная
-//        if currentDateType == .from {
-//            startButton.setTitleTextAttributes([.foregroundColor: activeColor, .font: activeFont], for: .normal)
-//            endButton.setTitleTextAttributes([.foregroundColor: inactiveColor, .font: inactiveFont], for: .normal)
-//        } else {
-//            startButton.setTitleTextAttributes([.foregroundColor: inactiveColor, .font: inactiveFont], for: .normal)
-//            endButton.setTitleTextAttributes([.foregroundColor: activeColor, .font: activeFont], for: .normal)
-//        }
+        let activeColor = C.merchantMarineBlue
+        let inactiveColor = UIColor.secondaryLabel
+        let activeFont = UIFont.systemFont(ofSize: 17, weight: .semibold)
+        let inactiveFont = UIFont.systemFont(ofSize: 17, weight: .medium)
+        
+        // активная
+        if currentDateType == .from {
+            startButton.setTitleTextAttributes([.foregroundColor: activeColor, .font: activeFont], for: .normal)
+            endButton.setTitleTextAttributes([.foregroundColor: inactiveColor, .font: inactiveFont], for: .normal)
+        } else {
+            startButton.setTitleTextAttributes([.foregroundColor: inactiveColor, .font: inactiveFont], for: .normal)
+            endButton.setTitleTextAttributes([.foregroundColor: activeColor, .font: activeFont], for: .normal)
+        }
         
         
     }

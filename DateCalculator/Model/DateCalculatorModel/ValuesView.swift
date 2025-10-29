@@ -156,8 +156,8 @@ extension ValuesView {
     private func updateLabels() {
         valueLabels.removeAll()
         rows = layoutType == .row ? 1 : segments.count
-        let fontSize = (max: 30.0, min: 18.0)
-        let size = layoutType == .row ? 30 : fontSize.max - (fontSize.max - fontSize.min)/4 * Double(segments.count)
+        let fontSize = (max: 32.0, min: 20.0)
+        let size = layoutType == .row ? fontSize.max : fontSize.max - (fontSize.max - fontSize.min)/4 * Double(segments.count)
         let labelCount = layoutType == .row ? segments.count - segmentIndex : segments.count
         
         for row in 0..<rows {
@@ -525,7 +525,7 @@ extension ValuesView {
         addSubview(directionView)
         directionView.translatesAutoresizingMaskIntoConstraints = false
         directionView.backgroundColor = .systemBackground
-        directionView.layer.cornerRadius = 9
+        directionView.layer.cornerRadius = 10
         directionView.layer.shadowColor = UIColor.black.cgColor
         directionView.layer.shadowOpacity = 0.05
         directionView.layer.shadowRadius = 4
@@ -536,8 +536,8 @@ extension ValuesView {
         NSLayoutConstraint.activate([
             directionView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
             directionView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
-            directionView.widthAnchor.constraint(equalToConstant: 18),
-            directionView.heightAnchor.constraint(equalToConstant: 18)
+            directionView.widthAnchor.constraint(equalToConstant: 20),
+            directionView.heightAnchor.constraint(equalToConstant: 20)
         ])
 
         setupDirectionIcon()
@@ -565,7 +565,7 @@ extension ValuesView {
         
         let config = UIImage.SymbolConfiguration(pointSize: 13, weight: .bold)
         let symbolName = isReversed ? "arrow.left" : "arrow.right"
-        let color = isReversed ? UIColor.systemRed : UIColor.systemGreen
+        let color = isReversed ? C.veryBerry : C.mediterraneanSea
         
         directionIcon.image = UIImage(systemName: symbolName, withConfiguration: config)
         directionIcon.tintColor = color.withAlphaComponent(0.85)
