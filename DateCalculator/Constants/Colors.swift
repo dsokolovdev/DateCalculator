@@ -43,7 +43,7 @@ struct C {
     struct Cards {
         static let sourLemon = UIColor { trait in
             if trait.userInterfaceStyle == .dark {
-                return UIColor(red: 0.75, green: 0.66, blue: 0.36, alpha: 1.0)//UIColor(red: 0.68, green: 0.62, blue: 0.38, alpha: 1.00)
+                return UIColor(red: 0.47, green: 0.42, blue: 0.27, alpha: 1.0) // #786B45
             } else {
                 return UIColor(red: 1.00, green: 0.92, blue: 0.65, alpha: 1.00) //yellow *
             }
@@ -116,7 +116,7 @@ struct C {
         
         static let waterfall = UIColor { trait in
             if trait.userInterfaceStyle == .dark {
-                return UIColor(red: 0.16, green: 0.46, blue: 0.45, alpha: 0.40) // глубокий морской зелёно-синий
+                return UIColor(red: 0.20, green: 0.56, blue: 0.54, alpha: 0.40) // #33908A // глубокий морской зелёно-синий
             } else {
                 return UIColor(red: 0.22, green: 0.68, blue: 0.66, alpha: 0.40)
             }
