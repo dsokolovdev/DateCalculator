@@ -71,11 +71,6 @@ final class DateCalculatorViewController: UIViewController {
     private var startItem: UIBarButtonItem!
     private var endItem: UIBarButtonItem!
     private var swapItem: UIBarButtonItem!
-    
-    
-    private var datesToolbarFixedBtn: UIToolbar!
-    private var sItem: UIBarButtonItem!
-    private var eItem: UIBarButtonItem!
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -96,10 +91,11 @@ final class DateCalculatorViewController: UIViewController {
         setupValuesView()
         setupBottomToolbar()
         setupDatePicker()
-        setupDatesButtonsToolbar()
+        //setupDatesButtonsToolbar()
+        setupDatesButtonsToolbarFixed()
         setupDateButtonsBarLables()
         setupScrollView()
-        setupDatesButtonsToolbarLabels()
+        
         
         
         viewModel.handleDateChange(startDate, for: currentDateType)
@@ -450,44 +446,44 @@ extension DateCalculatorViewController {
 extension DateCalculatorViewController {
     
     /// Adds a toolbar above the date picker for selecting start/end dates and swapping them.
-    private func setupDatesButtonsToolbar() {
-        //let toolbar = UIToolbar()
-        datesToolbar = UIToolbar()
-        datesToolbar.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(datesToolbar)
-
-        startButton = AnimatedBarButtonItem(title: startDate.readableFormat, style: .plain, target: self, action: #selector(selectStartDate))
-        endButton = AnimatedBarButtonItem(title: endDate.readableFormat, style: .plain, target: self, action: #selector(selectEndDate))
-        
-        swapButton = AnimatedBarButtonItem(
-            image: UIImage(systemName: "arrow.left.arrow.right"),
-            style: .plain,
-            target: self,
-            action: #selector(swapDates)
-        )
-
-        let flex = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-        //let spacer = UIBarButtonItem(barButtonSystemItem: .fixedSpace, target: nil, action: nil)
-        //spaser.width = 20
-        flex.width = 10
-        datesToolbar.items = [startButton, flex, swapButton, flex, endButton]
-        
-        highlightActiveButton()
-
-        NSLayoutConstraint.activate([
-            datesToolbar.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
-            datesToolbar.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-            datesToolbar.bottomAnchor.constraint(equalTo: datePicker.topAnchor, constant: -8)
-        ])
-    }
+//    private func setupDatesButtonsToolbar() {
+//        //let toolbar = UIToolbar()
+//        datesToolbar = UIToolbar()
+//        datesToolbar.translatesAutoresizingMaskIntoConstraints = false
+//        view.addSubview(datesToolbar)
+//
+//        startButton = AnimatedBarButtonItem(title: startDate.readableFormat, style: .plain, target: self, action: #selector(selectStartDate))
+//        endButton = AnimatedBarButtonItem(title: endDate.readableFormat, style: .plain, target: self, action: #selector(selectEndDate))
+//        
+//        swapButton = AnimatedBarButtonItem(
+//            image: UIImage(systemName: "arrow.left.arrow.right"),
+//            style: .plain,
+//            target: self,
+//            action: #selector(swapDates)
+//        )
+//
+//        let flex = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+//        //let spacer = UIBarButtonItem(barButtonSystemItem: .fixedSpace, target: nil, action: nil)
+//        //spaser.width = 20
+//        flex.width = 10
+//        datesToolbar.items = [startButton, flex, swapButton, flex, endButton]
+//        
+//        highlightActiveButton()
+//
+//        NSLayoutConstraint.activate([
+//            datesToolbar.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+//            datesToolbar.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
+//            datesToolbar.bottomAnchor.constraint(equalTo: datePicker.topAnchor, constant: -8)
+//        ])
+//    }
     
-    private func setupDatesButtonsToolbarLabels() {
+    private func setupDatesButtonsToolbarFixed() {
         datesToolbarFixed = UIToolbar()
         datesToolbarFixed.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(datesToolbarFixed)
 
         NSLayoutConstraint.activate([
-            datesToolbarFixed.bottomAnchor.constraint(equalTo: infoScrollView.topAnchor, constant: -8),
+            datesToolbarFixed.bottomAnchor.constraint(equalTo: datePicker.topAnchor, constant: -8),
             datesToolbarFixed.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
             datesToolbarFixed.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
             datesToolbarFixed.heightAnchor.constraint(equalToConstant: 44)
@@ -590,7 +586,7 @@ extension DateCalculatorViewController {
         stackView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            stackView.bottomAnchor.constraint(equalTo: datesToolbar.topAnchor, constant: -8),
+            stackView.bottomAnchor.constraint(equalTo: datesToolbarFixed.topAnchor, constant: -8),
             stackView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
             stackView.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor)
         ])
@@ -621,7 +617,7 @@ extension DateCalculatorViewController {
         NSLayoutConstraint.activate([
             infoScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             infoScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            infoScrollView.bottomAnchor.constraint(equalTo: datesToolbar.topAnchor, constant: -40),
+            infoScrollView.bottomAnchor.constraint(equalTo: datesToolbarFixed.topAnchor, constant: -40),
             infoScrollView.heightAnchor.constraint(equalToConstant: 100),
         ])
     }
@@ -719,7 +715,7 @@ extension DateCalculatorViewController {
     @objc private func toggleCalculateMode() {
         isCalculateModeActive.toggle()
         
-        let activeConfig = UIImage.SymbolConfiguration(paletteColors: [.systemRed, .label])
+        let activeConfig = UIImage.SymbolConfiguration(paletteColors: [C.chiGong, C.mazarineBlue])
         let inactiveConfig = UIImage.SymbolConfiguration(paletteColors: [.systemGray, .lightGray])
         
         let newImage = UIImage(
@@ -789,10 +785,11 @@ extension DateCalculatorViewController {
     
     @objc private func swapDates() {
         impactFeedback.impactOccurred()
-        UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { }
-        //UIView.transition(with: valuesView, duration: 0.25, options: [.transitionCrossDissolve]) { }
+        //UIView.transition(with: datesToolbar, duration: 0.25, options: [.transitionCrossDissolve]) { }
+        
         viewModel.swapDates(for: currentDateType)
         datePicker.setDate(currentDateType == .from ? startDate : endDate, animated: true)
+        
         //viewModel.notifyValuesDelegate()
         //updateValuesView()
         //didChangeDate(isSelectingStartDate ? startDate : endDate, for: isSelectingStartDate ? .from : .to)
@@ -837,13 +834,13 @@ extension DateCalculatorViewController {
         let inactiveFont = UIFont.systemFont(ofSize: 17, weight: .medium)
         
         // активная
-        if currentDateType == .from {
-            startButton.setTitleTextAttributes([.foregroundColor: activeColor, .font: activeFont], for: .normal)
-            endButton.setTitleTextAttributes([.foregroundColor: inactiveColor, .font: inactiveFont], for: .normal)
-        } else {
-            startButton.setTitleTextAttributes([.foregroundColor: inactiveColor, .font: inactiveFont], for: .normal)
-            endButton.setTitleTextAttributes([.foregroundColor: activeColor, .font: activeFont], for: .normal)
-        }
+//        if currentDateType == .from {
+//            startButton.setTitleTextAttributes([.foregroundColor: activeColor, .font: activeFont], for: .normal)
+//            endButton.setTitleTextAttributes([.foregroundColor: inactiveColor, .font: inactiveFont], for: .normal)
+//        } else {
+//            startButton.setTitleTextAttributes([.foregroundColor: inactiveColor, .font: inactiveFont], for: .normal)
+//            endButton.setTitleTextAttributes([.foregroundColor: activeColor, .font: activeFont], for: .normal)
+//        }
         
         guard
             let startLabel = startItem?.customView?.subviews.first as? UILabel,
@@ -861,27 +858,6 @@ extension DateCalculatorViewController {
             endLabel.textColor = activeColor
             endLabel.font = activeFont
         }
-        
-        //UIbuttons
-        if let startBtn = sItem?.customView as? UIButton,
-           let endBtn = eItem?.customView as? UIButton {
-            UIView.performWithoutAnimation {
-                if currentDateType == .from {
-                    startBtn.setTitleColor(activeColor, for: .normal)
-                    startBtn.titleLabel?.font = activeFont
-                    endBtn.setTitleColor(inactiveColor, for: .normal)
-                    endBtn.titleLabel?.font = inactiveFont
-                } else {
-                    startBtn.setTitleColor(inactiveColor, for: .normal)
-                    startBtn.titleLabel?.font = inactiveFont
-                    endBtn.setTitleColor(activeColor, for: .normal)
-                    endBtn.titleLabel?.font = activeFont
-                }
-            }
-        }
-        
-        
-        
     }
     
     
@@ -946,40 +922,22 @@ extension DateCalculatorViewController: DatePickerUpdatable {
     func didChangeDate(_ date: Date, for type: DateCalculatorViewModel.DateType) {
         let formatted = date.readableFormat
         
-        //UIBarButtonItems
-        switch type {
-        case .from:
-                startButton.title = formatted
-        case .to:
-            endButton.title = formatted
-        }
+//        //UIBarButtonItems
+//        switch type {
+//        case .from:
+//                startButton.title = formatted
+//        case .to:
+//            endButton.title = formatted
+//        }
         
         //UILables
         if let startLabel = startItem?.customView?.subviews.first as? UILabel,
         let endLabel = endItem?.customView?.subviews.first as? UILabel {
-            startLabel.text = startButton.title
-            endLabel.text = endButton.title
-        }
-        
-        //UIbuttons
-        if let startBtn = sItem?.customView as? UIButton,
-           let endBtn = eItem?.customView as? UIButton {
-
-            // 🔹 Отключаем анимации и пересчёт layout, чтобы не мигало
-            UIView.performWithoutAnimation {
-                //CATransaction.begin()
-                //CATransaction.setDisableActions(true) // <- ключевая строчка
-                switch type {
-                case .from:
-                    startBtn.setTitle(formatted, for: .normal)
-                    startBtn.sizeToFit()
-                case .to:
-                    endBtn.setTitle(formatted, for: .normal)
-                    endBtn.sizeToFit()
-                }
-                startBtn.layoutIfNeeded()
-                endBtn.layoutIfNeeded()
-                //CATransaction.commit()
+            switch type {
+            case .from:
+                startLabel.text = formatted
+            case .to:
+                endLabel.text = formatted
             }
         }
         
