@@ -66,6 +66,16 @@ final class DateCalculatorViewController: UIViewController {
     private var backButton: UIBarButtonItem!
     private var forwardButton: UIBarButtonItem!
     private var bottomToolbar: UIToolbar!
+    
+    private var datesToolbarFixed: UIToolbar!
+    private var startItem: UIBarButtonItem!
+    private var endItem: UIBarButtonItem!
+    private var swapItem: UIBarButtonItem!
+    
+    
+    private var datesToolbarFixedBtn: UIToolbar!
+    private var sItem: UIBarButtonItem!
+    private var eItem: UIBarButtonItem!
 
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -89,12 +99,18 @@ final class DateCalculatorViewController: UIViewController {
         setupDatesButtonsToolbar()
         setupDateButtonsBarLables()
         setupScrollView()
+        setupDatesButtonsToolbarLabels()
         
         
         viewModel.handleDateChange(startDate, for: currentDateType)
         let (western, chinese) = viewModel.getHoroscopes(for: Date())
         updateHoroscopeCards(date: startDate, western: western, chinese: chinese)
         viewModel.notifyValuesDelegate()
+        
+        
+        // 🧩 Настраиваем умные внутренние поля
+            view.preservesSuperviewLayoutMargins = true
+            view.directionalLayoutMargins = NSDirectionalEdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
         
     }
     
@@ -343,8 +359,8 @@ extension DateCalculatorViewController {
         // Констрейнты
         NSLayoutConstraint.activate([
             periodSegmentedControlBarView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            periodSegmentedControlBarView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            periodSegmentedControlBarView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            periodSegmentedControlBarView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+            periodSegmentedControlBarView.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
             periodSegmentedControlBarView.heightAnchor.constraint(equalToConstant: 38),
 
             periodSegmentedControl.centerYAnchor.constraint(equalTo: periodSegmentedControlBarView.centerYAnchor),
@@ -363,8 +379,8 @@ extension DateCalculatorViewController {
         
         NSLayoutConstraint.activate([
             valuesView.topAnchor.constraint(equalTo: periodSegmentedControlBarView.bottomAnchor, constant: 8),
-            valuesView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            valuesView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            valuesView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+            valuesView.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
             valuesView.heightAnchor.constraint(equalToConstant: 120)
         ])
     }
@@ -397,8 +413,8 @@ extension DateCalculatorViewController {
         view.addSubview(bottomToolbar)
 
         NSLayoutConstraint.activate([
-            bottomToolbar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            bottomToolbar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bottomToolbar.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+            bottomToolbar.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
             bottomToolbar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
         ])
     }
@@ -420,8 +436,8 @@ extension DateCalculatorViewController {
 
         NSLayoutConstraint.activate([
             datePicker.bottomAnchor.constraint(equalTo: bottomToolbar.topAnchor, constant: -16),
-            datePicker.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            datePicker.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            datePicker.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+            datePicker.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor)
         ])
         
         datePicker.date = startDate
@@ -449,18 +465,99 @@ extension DateCalculatorViewController {
             target: self,
             action: #selector(swapDates)
         )
-        //swapButton.tintColor = .black
 
         let flex = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        //let spacer = UIBarButtonItem(barButtonSystemItem: .fixedSpace, target: nil, action: nil)
+        //spaser.width = 20
+        flex.width = 10
         datesToolbar.items = [startButton, flex, swapButton, flex, endButton]
         
         highlightActiveButton()
 
         NSLayoutConstraint.activate([
-            datesToolbar.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            datesToolbar.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            datesToolbar.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+            datesToolbar.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
             datesToolbar.bottomAnchor.constraint(equalTo: datePicker.topAnchor, constant: -8)
         ])
+    }
+    
+    private func setupDatesButtonsToolbarLabels() {
+        datesToolbarFixed = UIToolbar()
+        datesToolbarFixed.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(datesToolbarFixed)
+
+        NSLayoutConstraint.activate([
+            datesToolbarFixed.bottomAnchor.constraint(equalTo: infoScrollView.topAnchor, constant: -8),
+            datesToolbarFixed.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+            datesToolbarFixed.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
+            datesToolbarFixed.heightAnchor.constraint(equalToConstant: 44)
+        ])
+
+        // 🔹 Создаём контейнеры
+        let startContainer = UIView()
+        let endContainer = UIView()
+        [startContainer, endContainer].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            $0.isUserInteractionEnabled = true  // 👈 ВАЖНО!
+        }
+
+        NSLayoutConstraint.activate([
+            startContainer.widthAnchor.constraint(equalToConstant: 130),
+            endContainer.widthAnchor.constraint(equalToConstant: 130)
+        ])
+
+        // 🔹 Добавляем UILabel внутрь контейнеров
+        let startLabel = AnimatedLabel()
+        startLabel.text = startDate.readableFormat
+        startLabel.font = .systemFont(ofSize: 17, weight: .medium)
+        startLabel.textAlignment = .center
+        startLabel.textColor = .label
+        startLabel.translatesAutoresizingMaskIntoConstraints = false
+        startLabel.widthAnchor.constraint(equalToConstant: 130).isActive = true
+        
+        let endLabel = AnimatedLabel()
+        endLabel.text = endDate.readableFormat
+        endLabel.font = .systemFont(ofSize: 17, weight: .medium)
+        endLabel.textAlignment = .center
+        endLabel.textColor = .label
+        endLabel.translatesAutoresizingMaskIntoConstraints = false
+        endLabel.widthAnchor.constraint(equalToConstant: 130).isActive = true
+        
+        startContainer.addSubview(startLabel)
+        endContainer.addSubview(endLabel)
+
+        NSLayoutConstraint.activate([
+            startLabel.centerXAnchor.constraint(equalTo: startContainer.centerXAnchor),
+            startLabel.centerYAnchor.constraint(equalTo: startContainer.centerYAnchor),
+            endLabel.centerXAnchor.constraint(equalTo: endContainer.centerXAnchor),
+            endLabel.centerYAnchor.constraint(equalTo: endContainer.centerYAnchor)
+        ])
+
+        // 🔹 Добавляем жесты прямо на контейнеры, не на label
+        let startTap = UITapGestureRecognizer(target: self, action: #selector(selectStartDate))
+        let endTap = UITapGestureRecognizer(target: self, action: #selector(selectEndDate))
+        startContainer.addGestureRecognizer(startTap)
+        endContainer.addGestureRecognizer(endTap)
+
+        // 🔹 Превращаем контейнеры в UIBarButtonItem
+        startItem = UIBarButtonItem(customView: startContainer)
+        endItem = UIBarButtonItem(customView: endContainer)
+        //startItem.customView?.addGestureRecognizer(startTap)
+        //endItem.customView?.addGestureRecognizer(endTap)
+
+        // 🔹 Кнопка "Swap"
+        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 17, weight: .medium)
+        swapButton = AnimatedBarButtonItem(
+            image: UIImage(systemName: "arrow.left.arrow.right", withConfiguration: symbolConfig),
+            style: .plain,
+            target: self,
+            action: #selector(swapDates)
+        )
+
+        let flex = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        datesToolbarFixed.items = [flex, startItem, flex, swapButton, flex, endItem, flex]
+
+        highlightActiveButton()
     }
 }
 
@@ -494,8 +591,8 @@ extension DateCalculatorViewController {
         
         NSLayoutConstraint.activate([
             stackView.bottomAnchor.constraint(equalTo: datesToolbar.topAnchor, constant: -8),
-            stackView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            stackView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20)
+            stackView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+            stackView.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor)
         ])
     }
 }
@@ -748,6 +845,42 @@ extension DateCalculatorViewController {
             endButton.setTitleTextAttributes([.foregroundColor: activeColor, .font: activeFont], for: .normal)
         }
         
+        guard
+            let startLabel = startItem?.customView?.subviews.first as? UILabel,
+            let endLabel = endItem?.customView?.subviews.first as? UILabel
+        else { return }
+        
+        if currentDateType == .from {
+            startLabel.textColor = activeColor
+            startLabel.font = activeFont
+            endLabel.textColor = inactiveColor
+            endLabel.font = inactiveFont
+        } else {
+            startLabel.textColor = inactiveColor
+            startLabel.font = inactiveFont
+            endLabel.textColor = activeColor
+            endLabel.font = activeFont
+        }
+        
+        //UIbuttons
+        if let startBtn = sItem?.customView as? UIButton,
+           let endBtn = eItem?.customView as? UIButton {
+            UIView.performWithoutAnimation {
+                if currentDateType == .from {
+                    startBtn.setTitleColor(activeColor, for: .normal)
+                    startBtn.titleLabel?.font = activeFont
+                    endBtn.setTitleColor(inactiveColor, for: .normal)
+                    endBtn.titleLabel?.font = inactiveFont
+                } else {
+                    startBtn.setTitleColor(inactiveColor, for: .normal)
+                    startBtn.titleLabel?.font = inactiveFont
+                    endBtn.setTitleColor(activeColor, for: .normal)
+                    endBtn.titleLabel?.font = activeFont
+                }
+            }
+        }
+        
+        
         
     }
     
@@ -813,11 +946,41 @@ extension DateCalculatorViewController: DatePickerUpdatable {
     func didChangeDate(_ date: Date, for type: DateCalculatorViewModel.DateType) {
         let formatted = date.readableFormat
         
+        //UIBarButtonItems
         switch type {
         case .from:
                 startButton.title = formatted
         case .to:
             endButton.title = formatted
+        }
+        
+        //UILables
+        if let startLabel = startItem?.customView?.subviews.first as? UILabel,
+        let endLabel = endItem?.customView?.subviews.first as? UILabel {
+            startLabel.text = startButton.title
+            endLabel.text = endButton.title
+        }
+        
+        //UIbuttons
+        if let startBtn = sItem?.customView as? UIButton,
+           let endBtn = eItem?.customView as? UIButton {
+
+            // 🔹 Отключаем анимации и пересчёт layout, чтобы не мигало
+            UIView.performWithoutAnimation {
+                //CATransaction.begin()
+                //CATransaction.setDisableActions(true) // <- ключевая строчка
+                switch type {
+                case .from:
+                    startBtn.setTitle(formatted, for: .normal)
+                    startBtn.sizeToFit()
+                case .to:
+                    endBtn.setTitle(formatted, for: .normal)
+                    endBtn.sizeToFit()
+                }
+                startBtn.layoutIfNeeded()
+                endBtn.layoutIfNeeded()
+                //CATransaction.commit()
+            }
         }
         
         //animateValueLabelsChange()
