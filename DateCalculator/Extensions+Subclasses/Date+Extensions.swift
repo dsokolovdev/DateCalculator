@@ -2,7 +2,7 @@
 //  Date+Extensions.swift
 //  DateCalculator
 //
-//  Created by Dmitry Sokolov on 2025.
+//  Created by Dmitry Sokolov on 21.10.2025.
 //  Utility extensions for date calculations and formatting.
 //
 
