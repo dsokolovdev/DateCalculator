@@ -1,57 +1,50 @@
 //
-//  LipYear.swift
+//  LeapYear.swift
 //  DateCalculator
 //
-//  Created by Dmitri  on 21.10.25.
+//  Created by Dmitri on 21.10.25.
+//
+//  Description:
+//  Provides a simple model describing whether a given year is a leap or common year,
+//  including visual representation (SF Symbol and color) for UI display.
 //
 
 import UIKit
 
+// MARK: - Leap Year Model
+/// Represents whether a given year is leap or common,
+/// with corresponding display color and SF Symbol.
 struct LeapYear {
     
+    // MARK: - Year Type
+    /// Two possible types of years: Leap or Common.
     enum YearType: String {
         case leapYear = "Leap Year"
         case commonYear = "Common Year"
         
+        /// Human-readable name used for display.
         var name: String { rawValue }
     }
     
+    // MARK: - Properties
+    /// Title shown in UI ("Year").
     var title: String { "Year" }
-    //var symbol: String { "✨" }
-    var symbol: String { "sparkles" } // SF Symbol
+    
+    /// SF Symbol name for display (e.g. `"sparkles"`).
+    var symbol: String { "sparkles" }
+    
+    /// UI color used to visually indicate leap or common year.
     var color: UIColor
+    
+    /// Type of year — either `.leapYear` or `.commonYear`.
     var type: YearType
     
+    // MARK: - Init
+    /// Initializes a LeapYear instance based on leap-year status.
+    ///
+    /// - Parameter isLeap: Boolean value indicating if the year is leap.
     init(isLeap: Bool) {
         self.type = isLeap ? .leapYear : .commonYear
         self.color = isLeap ? .systemYellow : UIColor.secondaryLabel.withAlphaComponent(0.2)
     }
 }
-
-//import Foundation
-//
-//struct LeapYear {
-//    
-//    enum YearType: String {
-//        case leap = "Leap Year"
-//        case common = "Non-leap Year"
-//        
-//        var name: String { rawValue }
-//    }
-//    
-//    enum Icon: String {
-//        case star = "✨"
-//        case emptyStar = "⚪️"
-//        
-//        var symbol: String { rawValue }
-//    }
-//    
-//    let title: String = "Year"
-//    let icon: Icon
-//    let type: YearType
-//    
-//    init(isLeap: Bool) {
-//        self.icon = isLeap ? .star : .emptyStar
-//        self.type = isLeap ? .leap : .common
-//    }
-//}
