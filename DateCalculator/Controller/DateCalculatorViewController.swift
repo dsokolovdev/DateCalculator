@@ -221,8 +221,8 @@ extension DateCalculatorViewController {
         let items = ["Year", "Month", "Week", "Day"]
         let activeColor = C.mazarineBlue
         let inactiveColor = UIColor.secondaryLabel
-        let activeFont = UIFont.systemFont(ofSize: 15, weight: .semibold)
-        let inactiveFont = UIFont.systemFont(ofSize: 15, weight: .medium)
+        let activeFont = UIFont.systemFont(ofSize: 14, weight: .semibold)
+        let inactiveFont = UIFont.systemFont(ofSize: 14, weight: .medium)
         
         periodSegmentedControl = UISegmentedControl(items: items)
         periodSegmentedControl.selectedSegmentIndex = 1

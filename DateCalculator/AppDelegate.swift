@@ -2,7 +2,7 @@
 //  AppDelegate.swift
 //  DateCalculator
 //
-//  Created by Dmitri  on 10.10.25.
+//  Created by Dmitry  on 10.10.25.
 //
 
 import UIKit
