@@ -97,7 +97,7 @@ final class DateCalculatorViewController: UIViewController {
         setupScrollView()
         
         
-        
+        //update dates, update horoscope cards
         viewModel.handleDateChange(startDate, for: currentDateType)
         let (western, chinese) = viewModel.getHoroscopes(for: Date())
         updateHoroscopeCards(date: startDate, western: western, chinese: chinese)
@@ -883,7 +883,8 @@ extension DateCalculatorViewController {
 
 // MARK: - Bottom Toolbar Actions
 extension DateCalculatorViewController {
-
+    
+    ///Trigged when BackButton tapped. Call DCViewmodel.goBack() -> DCModel.goBack()
     @objc private func goBack() {
         impactFeedback.impactOccurred()
         print("← Previous date")

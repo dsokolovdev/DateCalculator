@@ -18,7 +18,6 @@ struct C {
         }
     }
     
-    /// Secondary red accent for warnings or energy
     static let chiGong = UIColor { trait in
         if trait.userInterfaceStyle == .dark {
             return UIColor(red: 0.99, green: 0.24, blue: 0.24, alpha: 1.00)
@@ -35,9 +34,29 @@ struct C {
         }
     }
     
-    static let veryBerry = UIColor(red: 0.71, green: 0.20, blue: 0.44, alpha: 1.00)
-    static let mediterraneanSea = UIColor(red: 0.07, green: 0.54, blue: 0.65, alpha: 1.00)
-    static let merchantMarineBlue = UIColor(red: 0.02, green: 0.32, blue: 0.87, alpha: 1.00)
+    static let veryBerry = UIColor { trait in
+        if trait.userInterfaceStyle == .dark {
+            return UIColor(red: 0.90, green: 0.55, blue: 0.70, alpha: 1.00) // светлее для темной темы
+        } else {
+            return UIColor(red: 0.71, green: 0.20, blue: 0.44, alpha: 1.00) // #B53570
+        }
+    }
+
+    static let mediterraneanSea = UIColor { trait in
+        if trait.userInterfaceStyle == .dark {
+            return UIColor(red: 0.32, green: 0.74, blue: 0.82, alpha: 1.00) // светлее, менее насыщенный вариант
+        } else {
+            return UIColor(red: 0.07, green: 0.54, blue: 0.65, alpha: 1.00) // #1289A6
+        }
+    }
+
+    static let merchantMarineBlue = UIColor { trait in
+        if trait.userInterfaceStyle == .dark {
+            return UIColor(red: 0.36, green: 0.56, blue: 0.96, alpha: 1.00) // светлый голубой для темной темы
+        } else {
+            return UIColor(red: 0.02, green: 0.32, blue: 0.87, alpha: 1.00) // #0552DE
+        }
+    }
     
     
     struct Cards {
@@ -253,87 +272,6 @@ struct C {
     
     
 }
-
-// MARK: - Dynamic Title / Name Colors
-//extension C.Cards {
-//
-//    static func titleLabelColor(for background: UIColor) -> UIColor {
-//        return UIColor { trait in
-//            let isDark = (trait.userInterfaceStyle == .dark)
-//
-//            switch background {
-//            case C.Cards.selectedBlue:
-//                return isDark
-//                ? UIColor(red: 0.63, green: 0.77, blue: 0.95, alpha: 1.0) // светлый стальной синий #A1C4F2
-//                : UIColor(red: 0.34, green: 0.49, blue: 0.70, alpha: 1.0) // #6B94C7
-//
-//            case C.Cards.sourLemon:
-//                return isDark
-//                ? UIColor(red: 0.95, green: 0.85, blue: 0.42, alpha: 1.0) // золотисто-жёлтый #E1C95C
-//                : UIColor(red: 0.58, green: 0.50, blue: 0.20, alpha: 1.0) // тёплый, чуть темнее желтого
-//
-//            case C.Cards.waterfall:
-//                return isDark
-//                ? UIColor(red: 0.45, green: 0.76, blue: 0.75, alpha: 1.0) // мягкий бирюзовый #73C2BF
-//                : UIColor(red: 0.16, green: 0.46, blue: 0.45, alpha: 1.0) // тёмно-бирюзовый
-//
-//            case C.Cards.innuendo:
-//                return isDark
-//                ? UIColor(red: 0.70, green: 0.74, blue: 0.80, alpha: 1.0) // светло-графитовый #B3BCCB
-//                : UIColor(red: 0.36, green: 0.39, blue: 0.45, alpha: 1.0) // серо-графитовый
-//
-//            default:
-//                return UIColor.label.withAlphaComponent(isDark ? 0.8 : 0.7)
-//            }
-//        }
-//    }
-//
-//    static func nameLabelColor(for background: UIColor) -> UIColor {
-//        return UIColor { trait in
-//            let isDark = (trait.userInterfaceStyle == .dark)
-//
-//            switch background {
-//            case C.Cards.selectedBlue:
-//                return isDark
-//                ? UIColor(red: 0.50, green: 0.67, blue: 0.88, alpha: 1.0) // #80ABDFFF
-//                : UIColor(red: 0.22, green: 0.33, blue: 0.52, alpha: 1.0) // #385483
-//
-//            case C.Cards.sourLemon:
-//                return isDark
-//                ? UIColor(red: 0.90, green: 0.82, blue: 0.55, alpha: 1.0) // #B79E45
-//                : UIColor(red: 0.39, green: 0.33, blue: 0.07, alpha: 1.0) // #645411
-//
-//            case C.Cards.waterfall:
-//                return isDark
-//                ? UIColor(red: 0.38, green: 0.70, blue: 0.69, alpha: 1.0) // #61B3AF
-//                : UIColor(red: 0.09, green: 0.33, blue: 0.32, alpha: 1.0) // #165352
-//
-//            case C.Cards.innuendo:
-//                return isDark
-//                ? UIColor(red: 0.63, green: 0.66, blue: 0.72, alpha: 1.0) // #A1A8B7
-//                : UIColor(red: 0.25, green: 0.27, blue: 0.32, alpha: 1.0) // #404552
-//
-//            case C.Cards.customPurple:
-//                return isDark
-//                ? UIColor(red: 0.63, green: 0.54, blue: 0.76, alpha: 1.0) // #A18AC2
-//                : UIColor(red: 0.35, green: 0.27, blue: 0.46, alpha: 1.0) // #594478
-//
-//            case C.Cards.customGreen:
-//                return isDark
-//                ? UIColor(red: 0.42, green: 0.67, blue: 0.63, alpha: 1.0) // #6CADA1
-//                : UIColor(red: 0.13, green: 0.34, blue: 0.31, alpha: 1.0) // #215752
-//
-//            case C.Cards.pinkGlamour:
-//                return isDark
-//                ? UIColor(red: 0.86, green: 0.45, blue: 0.45, alpha: 1.0) // #DB7373
-//                : UIColor(red: 0.52, green: 0.09, blue: 0.09, alpha: 1.0) // #841717
-//
-//            default:
-//                return UIColor.label.withAlphaComponent(isDark ? 0.8 : 0.7)
-//            }
-//        }
-//    }
-//}
 
 extension C.Cards {
 

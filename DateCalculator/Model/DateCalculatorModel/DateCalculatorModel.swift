@@ -17,10 +17,14 @@ struct DateCalculatorModel {
 #endif
     
     // MARK: - Nested Type
-    struct Dates: Equatable {
+    struct Dates {
         private(set) var selectedDate: Date
         private(set) var history: [Date]
         private(set) var currentIndex: Int
+        
+        var isToday: Bool {
+            Calendar.current.isDateInToday(selectedDate)
+        }
         
         init(startDate: Date = Date().startOfDay) {
             self.selectedDate = startDate
@@ -28,7 +32,7 @@ struct DateCalculatorModel {
             self.currentIndex = 0
         }
         
-        //trigged when date changes occure
+        //Trigged when date has been changed
         mutating func updateSelectedDate(_ newDate: Date, triggeredByUser: Bool) {
             guard newDate != selectedDate else { return }
             
@@ -60,34 +64,31 @@ struct DateCalculatorModel {
         }
         
         //for navigation buttons: back forward today swap
+        ///Trigged when backButton tapped
+        ///DCViewController: @objc private func goBack()  -> DCViewModel: func goBack(for type: DateType) -> CURRENT: DateCalculatorModel: func goBack()
         mutating func goBack() -> Date? {
             guard currentIndex > 0 else { return nil }
             currentIndex -= 1
             selectedDate = history[currentIndex]
             return selectedDate
         }
-        
+        ///Trigged when forwardButton tapped
+        ///DCViewController: @objc private func goForward()  -> DCViewModel: func goForward(for type: DateType) -> CURRENT: DateCalculatorModel: func goForward()
         mutating func goForward() -> Date? {
             guard currentIndex < history.count - 1 else { return nil }
             currentIndex += 1
             selectedDate = history[currentIndex]
             return selectedDate
         }
-        
-        mutating func goToToday() -> Date {
+        ///Trigged when todayButton tapped
+        ///DCViewController: @objc private func goToday()  -> DCViewModel: func goToday(for type: DateType) -> CURRENT: DateCalculatorModel: func goToday()
+        mutating func goToday() -> Date {
             let today = Date().startOfDay
             updateSelectedDate(today, triggeredByUser: true)
             return today
         }
         
-        var isToday: Bool {
-            Calendar.current.isDateInToday(selectedDate)
-        }
-        
-        static func == (lhs: Dates, rhs: Dates) -> Bool  {
-            lhs.selectedDate == rhs.selectedDate
-        }
-        
+        ///Debug Info printed in debugger area
         func debugInfo(for property: String, _ function: String = #function, _ file: String = #fileID, _ line: Int = #line) -> String {
             let location = file.components(separatedBy: "/").last?.replacingOccurrences(of: ".swift", with: "") ?? "UnknownFile"
             return """
@@ -99,11 +100,13 @@ struct DateCalculatorModel {
         }
     }
     
-    // MARK: - Two independent histories
+    //From and To date of type of above Struct Dates
     var fromDates = Dates()
     var toDates = Dates()
     
     // MARK: - Horoscope
+    ///Get horoscopes data
+    ///DCViewController: func updateHoroscopes(for date: Date, western: WesternHoroscope, chinese: ChineseHoroscope) -> DCViewModel: private func updateHoroscopes(for date: Date) -> func getHoroscopes(for date: Date) -> CURRENT: func getHoroscopes(for data: Date)
     func getHoroscopes(for data: Date) -> (western: WesternHoroscope, chinese: ChineseHoroscope) {
         let western = WesternHoroscope.get(for: data)
         let chinese = ChineseHoroscope.get(for: data)
@@ -111,6 +114,8 @@ struct DateCalculatorModel {
         return(western, chinese)
     }
     
+    ///Trigged when swapButton tapped
+    ///DCViewController: @objc private func swapDates()  -> DCViewModel: func swapDates(for type: DateType)-> CURRENT:  mutating func swapDates()
     mutating func swapDates() {
         let fromDate = fromDates.selectedDate
         let toDate = toDates.selectedDate
@@ -120,6 +125,15 @@ struct DateCalculatorModel {
     }
 }
 
+//MARK: - Protocol Conformance
+//Fot comparisson of fromDate and toDates in DCViewModel: func updateButtonsState(for type: DateType)
+extension DateCalculatorModel.Dates: Equatable {
+    static func == (lhs: DateCalculatorModel.Dates, rhs: DateCalculatorModel.Dates) -> Bool  {
+        lhs.selectedDate == rhs.selectedDate
+    }
+}
+
+//MARK: - Debug Info
 extension DateCalculatorModel {
     /// Возвращает краткую сводку состояния обеих историй
     var fullDebugInfo: String {
@@ -141,29 +155,3 @@ extension DateCalculatorModel {
 #endif
     }
 }
-
-
-    
-    
-    
-//    func getDateFromHistory(by index: Int) -> Date? {
-//        guard history.indices.contains(index) else { return nil }
-//        return history[index]
-//    }
-    
-//    // MARK: - Western Horoscope
-//    func getWesternHoroscope(for date: Date) -> WesternHoroscope {
-//        WesternHoroscope.get(for: date)
-//    }
-//    
-//    // MARK: - Chinese Horoscope
-//    func getChineseHoroscope(for date: Date) -> ChineseHoroscope {
-//        ChineseHoroscope.get(for: date)
-//    }
-//    
-//    // MARK: - Combined Horoscope
-//    func getHoroscopes(for date: Date) -> (western: WesternHoroscope, chinese: ChineseHoroscope) {
-//        let western = getWesternHoroscope(for: date)
-//        let chinese = getChineseHoroscope(for: date)
-//        return (western, chinese)
-//    }

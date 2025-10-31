@@ -19,6 +19,7 @@ protocol DatePickerUpdatable: AnyObject {
                                  isSwapButtonEnabled: Bool)
 }
 
+///Protocol to inform DateCalculatorViewController about segments amount chanes
 protocol SegmentsUpdatable: AnyObject {
     func updateSegments(_ segmetns: [String])
     //func updateValuesView(_ labels: [String])
@@ -29,17 +30,15 @@ protocol ValuesViewUpdatable: AnyObject {
     func updateValues(segments: [String], selectedIndex: Int, from start: Date, to end: Date)
 }
 
-
-//Notify DateCalculatorViewController to annimate elements
-//protocol Animational: AnyObject {
-//    func animateValueLabelsChange()
-//    func animateDateButtonsChange()
-//    func animateViewCardsChange()
-//}
-
 //MARK: - DateCalculator View Model
 /// Управляет моделью выбора дат и взаимодействием с UI
 final class DateCalculatorViewModel {
+    
+    //Data Types
+    enum DateType {
+        case from
+        case to
+    }
     
     weak var datePickerDelegate: DatePickerUpdatable? //уведомляет контроллер об изменнении дат
     weak var segmentsDelegate: SegmentsUpdatable? //уведомляет контроллер об изменнении количества сегментов в periodSegmentedControl
@@ -60,17 +59,12 @@ final class DateCalculatorViewModel {
         self.settingsModel.delegate = self
     }
     
-    
-    enum DateType {
-        case from
-        case to
-    }
-    
     // MARK: - Handle DatePicker Change
+    //Called when dates changes
     func handleDateChange(_ date: Date, for type: DateType) {
         switch type {
         case .from:
-            model.fromDates.updateSelectedDate(date, triggeredByUser: true)
+            model.fromDates.updateSelectedDate(date, triggeredByUser: true)  //
             updateHoroscopes(for: model.fromDates.selectedDate)
             datePickerDelegate?.didChangeDate(model.fromDates.selectedDate, for: .from)
             
@@ -83,12 +77,13 @@ final class DateCalculatorViewModel {
         
         notifyValuesDelegate()
         updateButtonsState(for: type)
-        //animateViewControllerChanges()
         model.log(model.fullDebugInfo)
         
     }
     
     // MARK: - Navigation
+    
+    //Trigged by 
     func goBack(for type: DateType) {
         if let date = (type == .from) ? model.fromDates.goBack() : model.toDates.goBack() {
             datePickerDelegate?.didChangeDate(date, for: type)
@@ -98,7 +93,6 @@ final class DateCalculatorViewModel {
         
         notifyValuesDelegate()
         updateButtonsState(for: type)
-        //animateViewControllerChanges()
         model.log(model.fullDebugInfo)
     }
     
@@ -110,24 +104,21 @@ final class DateCalculatorViewModel {
         
         notifyValuesDelegate()
         updateButtonsState(for: type)
-        //animateViewControllerChanges()
         model.log(model.fullDebugInfo)
     }
     
     func goToToday(for type: DateType) {
-        let date = (type == .from) ? model.fromDates.goToToday() : model.toDates.goToToday()
+        let date = (type == .from) ? model.fromDates.goToday() : model.toDates.goToday()
         datePickerDelegate?.didChangeDate(date, for: type)
         updateHoroscopes(for: date)
         
         notifyValuesDelegate()
         updateButtonsState(for: type)
-        //animateViewControllerChanges()
         model.log(model.fullDebugInfo)
     }
     
     func swapDates(for type: DateType) {
         model.swapDates()
-        //animateViewControllerChanges()
         datePickerDelegate?.didChangeDate(model.fromDates.selectedDate, for: .from)
         datePickerDelegate?.didChangeDate(model.toDates.selectedDate, for: .to)
         
@@ -163,9 +154,9 @@ final class DateCalculatorViewModel {
         print("dates.selectedDate = \(dates.selectedDate)")
         
         datePickerDelegate?.updateNavigationButtons(isBackButtonEnabled: isBackEnabled,
-                                          isForwardButtonEnabled: isForwardEnabled,
-                                          isTodayButtonEnabled: isTodayEnabled,
-                                          isSwapButtonEnabled: isSwapEnbabled
+                                                    isForwardButtonEnabled: isForwardEnabled,
+                                                    isTodayButtonEnabled: isTodayEnabled,
+                                                    isSwapButtonEnabled: isSwapEnbabled
         )
     }
     
@@ -179,18 +170,14 @@ final class DateCalculatorViewModel {
         valuesDelegate?.updateValues(segments: visibleSegments, selectedIndex: currentSegmentIndex, from: from, to: to)
     }
     
-//    func animateViewControllerChanges() {
-//        animationDelegate?.animateDateButtonsChange()
-//        animationDelegate?.animateValueLabelsChange()
-//    }
 }
 
 //MARK: - Delegate
+///SettingVC notified DCViewModel that changes in segments has happaned, and DCViewModel upon this notification update segments
 extension DateCalculatorViewModel: SettingsDelegate {
     func settingsDidUpdate(_ settings: SettingsModel) {
         visibleSegments = settings.visibleSegments
         segmentsDelegate?.updateSegments(visibleSegments)
-        //notifyValuesDelegate()
     }
     
 }
