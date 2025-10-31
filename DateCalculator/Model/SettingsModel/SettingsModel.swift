@@ -11,18 +11,22 @@
 
 import UIKit
 
-//MARK: - Protocols
-//Inform DateCalculatorViewModel about changes after switch is toggled or Reset button is pressed
+// MARK: - Protocols
+/// Notifies `DateCalculatorViewModel` when settings have been updated
+/// (e.g., switch toggled or Reset button pressed).
 protocol SettingsDelegate: AnyObject {
     func settingsDidUpdate(_ settings: SettingsModel)
 }
 
-//MARK: - Setting Model
+// MARK: - Settings Model
 /// The view model that manages all logic for the Settings screen.
-/// Controls switch states, reset actions, and persistence using UserDefaults.
+/// Controls switch states, reset actions, and persistence using `UserDefaults`.
 final class SettingsModel {
+    
+    // MARK: - Delegate
     weak var delegate: SettingsDelegate?
     
+    // MARK: - Model Data
     private(set) var settings: Settings = Settings(
         sections: [
             SettingsSection(
@@ -35,23 +39,22 @@ final class SettingsModel {
             SettingsSection(
                 title: "Reset Settings",
                 items: [
-                    ButtonItem(name: "Reset to Defaults", buttonTitle: "Reset", isEnabled: false, delegate: nil)
+                    ButtonItem(name: "Reset to Defaults",
+                               buttonTitle: "Reset",
+                               isEnabled: false,
+                               delegate: nil)
                 ]
             )
         ]
     )
     
+    // MARK: - Init
     init() {
         loadSavedSwitchStates()
         updateResetButtonState()
     }
     
-    func updateButtonItem(_ updatedItem: ButtonItem, at indexPath: IndexPath) {
-            settings.sections[indexPath.section].items[indexPath.row] = updatedItem
-        }
-    
     // MARK: - Static Footer
-    
     /// A footer text displayed at the bottom of the Settings screen.
     /// Automatically includes the current app version and build number.
     static var settingsFooterText: String {
@@ -65,9 +68,9 @@ final class SettingsModel {
         """
     }
     
-    // MARK: - Properties
+    // MARK: - Accessors
     
-    /// Convenience accessor for modifying sections.
+    /// Convenience accessor for modifying sections internally.
     private var sections: [SettingsSection] {
         get { settings.sections }
         set { settings.sections = newValue }
@@ -89,9 +92,8 @@ final class SettingsModel {
     
     // MARK: - State Management
     
-    /// Resets all switch items to their default values
-    /// and updates the corresponding entries in UserDefaults.
-     func resetToDefaults() {
+    /// Resets all switches to their default values and updates `UserDefaults`.
+    func resetToDefaults() {
         for sectionIndex in 0..<sections.count {
             for itemIndex in 0..<sections[sectionIndex].items.count {
                 if var switchItem = sections[sectionIndex].items[itemIndex] as? SwitchItem {
@@ -103,9 +105,8 @@ final class SettingsModel {
         }
     }
     
-    /// Updates the Reset button state depending on whether
-    /// any switch differs from its default state.
-     func updateResetButtonState() {
+    /// Enables or disables the Reset button depending on switch states.
+    func updateResetButtonState() {
         var shouldEnable = false
         
         for section in sections {
@@ -117,19 +118,20 @@ final class SettingsModel {
                 }
             }
         }
-
+        
         if var buttonItem = sections.last?.items.first as? ButtonItem {
             buttonItem.changeButtonState(to: shouldEnable)
             sections[sections.count - 1].items[0] = buttonItem
         }
-         delegate?.settingsDidUpdate(self)
+        
+        delegate?.settingsDidUpdate(self)
     }
     
-    /// Updates a specific switch state and persists it to UserDefaults.
+    /// Updates a specific switch state and persists it to `UserDefaults`.
     /// - Parameters:
     ///   - key: The name of the switch.
     ///   - isOn: The new ON/OFF state.
-     func updateSwitchState(for key: String, to isOn: Bool) {
+    func updateSwitchState(for key: String, to isOn: Bool) {
         for sectionIndex in 0..<sections.count {
             for itemIndex in 0..<sections[sectionIndex].items.count {
                 if var switchItem = sections[sectionIndex].items[itemIndex] as? SwitchItem,
@@ -143,9 +145,8 @@ final class SettingsModel {
         delegate?.settingsDidUpdate(self)
     }
     
-    /// Loads saved switch states from UserDefaults (if available)
-    /// and applies them to the model.
-     func loadSavedSwitchStates() {
+    /// Loads saved switch states from `UserDefaults` and applies them to the model.
+    func loadSavedSwitchStates() {
         for section in 0..<sections.count {
             for item in 0..<sections[section].items.count {
                 if var switchItem = sections[section].items[item] as? SwitchItem {
@@ -158,13 +159,18 @@ final class SettingsModel {
         }
     }
     
-    /// Replaces the existing Reset button item with an updated instance.
+    /// Replaces the existing Reset button with an updated instance.
     /// - Parameter buttonItem: The new button to apply.
-     func updateButtonItem(_ buttonItem: ButtonItem) {
+    func updateButtonItem(_ buttonItem: ButtonItem) {
         guard !sections.isEmpty,
               !sections.last!.items.isEmpty else { return }
         
         sections[sections.count - 1].items[0] = buttonItem
+    }
+    
+    /// Updates a specific button item inside the table view (by index path).
+    func updateButtonItem(_ updatedItem: ButtonItem, at indexPath: IndexPath) {
+        settings.sections[indexPath.section].items[indexPath.row] = updatedItem
     }
 }
 
@@ -172,10 +178,12 @@ final class SettingsModel {
 extension SettingsModel {
     
     /// Returns a list of visible segments for the main screen based on active switches.
+    /// Always includes `"Year"` and `"Day"`, optionally `"Month"` and `"Week"`.
     var visibleSegments: [String] {
         var segments: [String] = ["Year", "Day"]
         var isMonthOn = false
         
+        // Month
         if let monthItem = sections
             .flatMap({ $0.items })
             .first(where: { ($0 as? SwitchItem)?.name == "Month" }) as? SwitchItem,
@@ -185,6 +193,7 @@ extension SettingsModel {
         }
         print(segments)
         
+        // Week
         if let weekItem = sections
             .flatMap({ $0.items })
             .first(where: { ($0 as? SwitchItem)?.name == "Week" }) as? SwitchItem,
@@ -195,4 +204,3 @@ extension SettingsModel {
         return segments
     }
 }
-
