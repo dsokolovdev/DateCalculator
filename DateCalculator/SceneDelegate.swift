@@ -2,79 +2,82 @@
 //  SceneDelegate.swift
 //  DateCalculator
 //
-//  Created by Dmitri  on 10.10.25.
+//  Created by Dmitry Sokolov on 10.10.2025.
+//
+//  Description:
+//  Manages the app’s main window and initial scene setup.
+//  Initializes shared models, view models, and the root navigation stack.
 //
 
 import UIKit
 
-class SceneDelegate: UIResponder, UIWindowSceneDelegate {
-
+final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+    
     var window: UIWindow?
-
-
+    
+    // MARK: - Scene Lifecycle
+    
     func scene(_ scene: UIScene,
                willConnectTo session: UISceneSession,
                options connectionOptions: UIScene.ConnectionOptions) {
+        
         guard let windowScene = (scene as? UIWindowScene) else { return }
-
-        // 1️⃣ Один общий экземпляр настроек
+        
+        // MARK: Setup Root Dependencies
+        // Create a shared SettingsModel instance.
         let settingsModel = SettingsModel()
-
-        // 2️⃣ Создаём ViewModel и передаём туда ссылку на ту же модель настроек
+        
+        // Create ViewModel with a reference to the same SettingsModel.
         let viewModel = DateCalculatorViewModel(settingsModel: settingsModel)
-
-        // 3️⃣ Создаём главный экран (DateCalculatorViewController)
+        
+        // Initialize the main screen.
         let dateCalculatorVC = DateCalculatorViewController(viewModel: viewModel)
-
-        // 4️⃣ Оборачиваем в UINavigationController
+        
+        // Embed inside UINavigationController.
         let navController = UINavigationController(rootViewController: dateCalculatorVC)
         
-//        // 🌈 Настраиваем общий фон
-//            let backgroundColor = UIColor { trait in
-//                trait.userInterfaceStyle == .dark
-//                ? UIColor(red: 0.13, green: 0.16, blue: 0.20, alpha: 1.0) // 🌙 #222A33
-//                : UIColor(red: 0.98, green: 0.99, blue: 1.00, alpha: 1.0) // ☀️ #FAFDFF
-//            }
-//
-//            navController.view.backgroundColor = backgroundColor
-//            dateCalculatorVC.view.backgroundColor = backgroundColor
-//            UINavigationBar.appearance().barTintColor = backgroundColor
-//            UINavigationBar.appearance().backgroundColor = backgroundColor
-
-        // 5️⃣ Создаём окно
+        //        // Optional: Custom global background
+        //        let backgroundColor = UIColor { trait in
+        //            trait.userInterfaceStyle == .dark
+        //            ? UIColor(red: 0.13, green: 0.16, blue: 0.20, alpha: 1.0) // 🌙 #222A33
+        //            : UIColor(red: 0.98, green: 0.99, blue: 1.00, alpha: 1.0) // ☀️ #FAFDFF
+        //        }
+        //        navController.view.backgroundColor = backgroundColor
+        //        dateCalculatorVC.view.backgroundColor = backgroundColor
+        //        UINavigationBar.appearance().barTintColor = backgroundColor
+        //        UINavigationBar.appearance().backgroundColor = backgroundColor
+        
+        // Configure and show window.
         let window = UIWindow(windowScene: windowScene)
         window.rootViewController = navController
         window.makeKeyAndVisible()
         self.window = window
     }
+    
+    // MARK: - Scene State Changes
+    
     func sceneDidDisconnect(_ scene: UIScene) {
-        // Called as the scene is being released by the system.
-        // This occurs shortly after the scene enters the background, or when its session is discarded.
-        // Release any resources associated with this scene that can be re-created the next time the scene connects.
-        // The scene may re-connect later, as its session was not necessarily discarded (see `application:didDiscardSceneSessions` instead).
+        // Called when the scene is released by the system.
+        // This occurs shortly after entering background or when discarded.
     }
-
+    
     func sceneDidBecomeActive(_ scene: UIScene) {
-        // Called when the scene has moved from an inactive state to an active state.
-        // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
+        // Called when the scene becomes active again.
+        // Restart paused tasks or refresh UI if necessary.
     }
-
+    
     func sceneWillResignActive(_ scene: UIScene) {
-        // Called when the scene will move from an active state to an inactive state.
-        // This may occur due to temporary interruptions (ex. an incoming phone call).
+        // Called when the scene is about to move from active to inactive.
+        // Useful for handling temporary interruptions (e.g., phone calls).
     }
-
+    
     func sceneWillEnterForeground(_ scene: UIScene) {
-        // Called as the scene transitions from the background to the foreground.
-        // Use this method to undo the changes made on entering the background.
+        // Called as the scene transitions from background to foreground.
+        // Undo changes made when entering the background.
     }
-
+    
     func sceneDidEnterBackground(_ scene: UIScene) {
-        // Called as the scene transitions from the foreground to the background.
-        // Use this method to save data, release shared resources, and store enough scene-specific state information
-        // to restore the scene back to its current state.
+        // Called as the scene transitions from foreground to background.
+        // Save data, release resources, and store enough state for restoration.
     }
-
-
 }
-

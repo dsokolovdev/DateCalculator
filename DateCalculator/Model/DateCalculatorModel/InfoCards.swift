@@ -2,7 +2,7 @@
 //  InfoCardsContainer.swift
 //  DateCalculator
 //
-//  Created by Dmitri on 21.10.25.
+//  Created by Dmitry on 21.10.25.
 //
 //  Description:
 //  Defines reusable InfoCard views (Western, Chinese, Year, and Statistics)

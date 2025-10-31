@@ -2,7 +2,7 @@
 //  LeapYear.swift
 //  DateCalculator
 //
-//  Created by Dmitri on 21.10.25.
+//  Created by Dmitry on 21.10.25.
 //
 //  Description:
 //  Provides a simple model describing whether a given year is a leap or common year,

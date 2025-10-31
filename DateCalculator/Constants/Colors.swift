@@ -2,7 +2,7 @@
 //  C.swift
 //  DateCalculator
 //
-//  Created by Dmitri  on 27.10.25.
+//  Created by Dmitry  on 27.10.25.
 //
 
 import UIKit

@@ -2,7 +2,7 @@
 //  Protocols.swift
 //  DateCalculator
 //
-//  Created by Dmitri on 25.10.25.
+//  Created by Dmitry on 25.10.25.
 //
 //  Description:
 //  Contains shared protocol and layout type definitions used across
