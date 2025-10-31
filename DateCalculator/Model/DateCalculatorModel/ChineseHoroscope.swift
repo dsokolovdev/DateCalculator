@@ -2,15 +2,22 @@
 //  ChineseHoroscope.swift
 //  DateCalculator
 //
-//  Created by Dmitry Sokolov on 2025.
+//  Created by Dmitry Sokolov on 18.10.2025.
+//
+//  Description:
+//  Provides a Chinese horoscope model based on the Chinese lunar calendar.
+//  Calculates Zodiac animal, Element, and Energy (Yin/Yang) for a given date.
 //
 
 import Foundation
 
-//MARK: - Western Horoscope Structure
+// MARK: - Chinese Horoscope Structure
+/// Represents the traditional Chinese horoscope for a specific date.
+/// Contains Zodiac (animal), Element, and Energy (Yin/Yang).
 struct ChineseHoroscope {
     
-    // MARK: - Zodiac (12 животных)
+    // MARK: - Zodiac (12 Animals)
+    /// The 12 Chinese zodiac animals, repeating every 12 years.
     enum Zodiac: String, CaseIterable {
         case rat = "Rat"
         case ox = "Ox"
@@ -25,9 +32,12 @@ struct ChineseHoroscope {
         case dog = "Dog"
         case pig = "Pig"
         
+        /// Human-readable name.
         var name: String { rawValue }
+        /// Section title used in UI.
         var title: String { "Chinese Zodiac" }
         
+        /// Emoji icon representing each animal.
         var icon: String {
             switch self {
             case .rat: return "🐀"
@@ -46,7 +56,8 @@ struct ChineseHoroscope {
         }
     }
     
-    // MARK: - Element (5 стихий)
+    // MARK: - Element (5 Elements)
+    /// The five classical Chinese elements, repeating every 10 years (each twice).
     enum Element: String, CaseIterable {
         case wood = "Wood"
         case fire = "Fire"
@@ -57,6 +68,7 @@ struct ChineseHoroscope {
         var name: String { rawValue }
         var title: String { "Fixed Element" }
         
+        /// Emoji icon representing the element.
         var icon: String {
             switch self {
             case .wood: return "🌳"
@@ -68,7 +80,8 @@ struct ChineseHoroscope {
         }
     }
     
-    // MARK: - Energy (инь / ян)
+    // MARK: - Energy (Yin / Yang)
+    /// Represents Yin or Yang energy, alternating every year.
     enum Energy: String {
         case yin = "Yin"
         case yang = "Yang"
@@ -76,6 +89,7 @@ struct ChineseHoroscope {
         var name: String { rawValue }
         var title: String { "Energy" }
         
+        /// Symbol for both Yin and Yang (☯️).
         var icon: String {
             switch self {
             case .yin: return "☯️"
@@ -85,67 +99,53 @@ struct ChineseHoroscope {
     }
     
     // MARK: - Properties
+    /// The animal sign for the year.
     let zodiac: Zodiac
+    /// The elemental association for the year.
     let element: Element
+    /// The energy polarity (Yin or Yang).
     let energy: Energy
     
-    // MARK: - Lookup Method
-//    static func get(for date: Date) -> ChineseHoroscope {
-//        let chineseCalendar = Calendar(identifier: .chinese)
-//        let components = chineseCalendar.dateComponents([.year], from: date)
-//        guard let chineseYear = components.year else {
-//            fatalError("Failed to extract Chinese year from date.")
-//        }
-//        
-//        // Индекс животного (12-летний цикл)
-//        let zodiacIndex = (chineseYear - 4) % 12
-//        // Индекс элемента (каждый элемент повторяется 2 года, всего 10-летний цикл)
-//        let elementIndex = ((chineseYear - 4) % 10) / 2
-//        // Энергия (чередуется каждый год)
-//        let energy: Energy = (chineseYear % 2 == 0) ? .yang : .yin
-//        
-//        let zodiac = Zodiac.allCases[zodiacIndex]
-//        let element = Element.allCases[elementIndex]
-//        
-//        return ChineseHoroscope(zodiac: zodiac, element: element, energy: energy)
-//    }
+    // MARK: - Internal Helpers
     
-    // MARK: - Безопасная функция положительного модуля
-        private static func posMod(_ x: Int, _ m: Int) -> Int {
-            ((x % m) + m) % m
+    /// Ensures positive modulo results (for safe array indexing).
+    private static func posMod(_ x: Int, _ m: Int) -> Int {
+        ((x % m) + m) % m
+    }
+    
+    // MARK: - Main Lookup Method
+    /// Returns the full Chinese horoscope for a given date.
+    ///
+    /// - Parameter date: The date to calculate the horoscope for.
+    /// - Returns: A `ChineseHoroscope` instance with zodiac, element, and energy.
+    static func get(for date: Date) -> ChineseHoroscope {
+        let chineseCalendar = Calendar(identifier: .chinese)
+        let comps = chineseCalendar.dateComponents([.year], from: date)
+        
+        guard let cyclicalYear = comps.year else {
+            // Fallback to default values to prevent crashes.
+            return ChineseHoroscope(zodiac: .rat, element: .wood, energy: .yang)
         }
-
-        // MARK: - Lookup Method (исправленный)
-        static func get(for date: Date) -> ChineseHoroscope {
-            let chineseCalendar = Calendar(identifier: .chinese)
-            let comps = chineseCalendar.dateComponents([.year], from: date)
-
-            guard let cyclicalYear = comps.year else {
-                // fallback, чтобы не было падений
-                return ChineseHoroscope(zodiac: .rat, element: .wood, energy: .yang)
-            }
-
-            // 0...59 (шестидесятилетний цикл)
-            let yearIndex = cyclicalYear - 1
-
-            // 12 земных ветвей — животное
-            let branchIndex = posMod(yearIndex, 12)
-
-            // 10 небесных стеблей — элемент и энергия
-            let stemIndex = posMod(yearIndex, 10)
-
-            // элемент повторяется каждые 2 года
-            let elementIndex = stemIndex / 2
-
-            // энергия: чётные — yang, нечётные — yin
-            let energy: Energy = (stemIndex % 2 == 0) ? .yang : .yin
-
-            // важно, чтобы порядок allCases совпадал с китайским циклом:
-            // Rat, Ox, Tiger, Rabbit, Dragon, Snake, Horse, Goat, Monkey, Rooster, Dog, Pig
-            let zodiac = Zodiac.allCases[branchIndex]
-            // Wood, Fire, Earth, Metal, Water
-            let element = Element.allCases[elementIndex]
-
-            return ChineseHoroscope(zodiac: zodiac, element: element, energy: energy)
-        }
+        
+        // The Chinese calendar operates on a 60-year cycle.
+        let yearIndex = cyclicalYear - 1
+        
+        // 12 Earthly Branches — determine the animal.
+        let branchIndex = posMod(yearIndex, 12)
+        
+        // 10 Heavenly Stems — determine element and energy.
+        let stemIndex = posMod(yearIndex, 10)
+        
+        // Each element repeats twice (Yang then Yin).
+        let elementIndex = stemIndex / 2
+        
+        // Even stems are Yang, odd stems are Yin.
+        let energy: Energy = (stemIndex % 2 == 0) ? .yang : .yin
+        
+        // Ensure correct zodiac and element ordering.
+        let zodiac = Zodiac.allCases[branchIndex]
+        let element = Element.allCases[elementIndex]
+        
+        return ChineseHoroscope(zodiac: zodiac, element: element, energy: energy)
+    }
 }
