@@ -2,20 +2,27 @@
 //  ValueView.swift
 //  DateCalculator
 //
-//  Created by Dmitri  on 24.10.25.
+//  Created by Dmitry on 24.10.25.
 //
+//  Description:
+//  Displays calculated date differences (Year / Month / Week / Day)
+//  in either Row or Grid layout style. Automatically updates when
+//  user changes segments or selected dates.
 
 import UIKit
 
 //MARK: - Values View
+/// A reusable view that displays date differences (Year / Month / Week / Day)
+/// in either Row or Grid layouts, and highlights the active segment.
 final class ValuesView: UIView, LayoutDisplayable {
-
+    
     // MARK: - Public Properties
+    /// Current layout type. Triggers a layout refresh when changed.
     var layoutType: LayoutType = .row { didSet { refreshLayout() } }
     
     // MARK: - Private Properties
-    private var segments: [String] = [] //{ didSet { refreshLayout() } }
-    private var segmentIndex: Int = 0 //{ didSet { refreshLayout() } }
+    private var segments: [String] = []
+    private var segmentIndex: Int = 0
     private var startDate: Date?
     private var endDate: Date?
     
@@ -51,7 +58,8 @@ final class ValuesView: UIView, LayoutDisplayable {
     }
     
     // MARK: - Public API
-    /// Принудительно обновить layout (например, если хочешь обновить значения)
+    /// Forces layout refresh (rebuilds labels/stacks and recolors active segment).
+    /// Call when you need to update values or after switching layout type.
     func refreshLayout() {
         guard !segments.isEmpty else { return }
         updateLabels()
@@ -60,16 +68,25 @@ final class ValuesView: UIView, LayoutDisplayable {
         updateLabelsColor()
     }
     
+    /// Updates current date range and refreshes numeric values.
+    /// - Parameters:
+    ///   - start: Start date of the calculation range.
+    ///   - end: End date of the calculation range.
     func updateDates(from start: Date, to end: Date) {
         startDate = start
         endDate = end
         updateLabelsValues()
-        
     }
-
 }
+
 //MARK: - Delegate
 extension ValuesView: ValuesViewUpdatable {
+    /// Receives new segments / selected index / dates from the ViewModel and updates the view.
+    /// - Parameters:
+    ///   - segments: Visible segments (e.g. ["Year","Month","Week","Day"])
+    ///   - selectedIndex: Selected segment index to emphasize.
+    ///   - start: Start date.
+    ///   - end: End date.
     func updateValues(segments: [String], selectedIndex: Int, from start: Date, to end: Date) {
         let shouldRefresh = self.segments != segments || self.segmentIndex != selectedIndex
         
@@ -78,21 +95,17 @@ extension ValuesView: ValuesViewUpdatable {
         self.startDate = start
         self.endDate = end
         
-        //refreshLayout()
         if shouldRefresh {
             refreshLayout()        // пересоздаём лейблы и стек
         } else {
             updateLabelsValues()   // просто обновляем цифры
         }
-        
-        print("ValuesView - Delegate: segmentIndex:\(segmentIndex)")
-
-        //self.updateDates(from: start, to: end)
     }
 }
 
 //MARK: - View
 extension ValuesView {
+    /// Configures background, corner radius and subtle shadow.
     private func setupAppearance() {
         backgroundColor = .systemBackground
         layer.cornerRadius = 20
@@ -105,8 +118,9 @@ extension ValuesView {
 
 //MARK: - SubView
 extension ValuesView {
+    /// Rebuilds subviews according to the current `layoutType`.
     private func updateViews() {
-        //subviews.forEach { $0.removeFromSuperview() }
+        
         subviews.filter { $0 != directionView }.forEach { $0.removeFromSuperview() }
         
         switch layoutType {
@@ -129,6 +143,7 @@ extension ValuesView {
         }
     }
     
+    /// Creates a horizontal stack for a row of value labels.
     private func makeHStack(labels: [UILabel]) -> UIStackView {
         let stack = UIStackView(arrangedSubviews: labels)
         stack.axis = .horizontal
@@ -138,6 +153,7 @@ extension ValuesView {
         return stack
     }
     
+    /// Adds a subview and pins it with consistent insets.
     private func addNewSubview(_ subview: UIView) {
         addSubview(subview)
         subview.translatesAutoresizingMaskIntoConstraints = false
@@ -153,6 +169,7 @@ extension ValuesView {
 // MARK: - Lables
 extension ValuesView {
     
+    /// Recreates the labels matrix (1 row for `.row`, N rows for `.grid`).
     private func updateLabels() {
         valueLabels.removeAll()
         rows = layoutType == .row ? 1 : segments.count
@@ -164,16 +181,12 @@ extension ValuesView {
             var rowLabels: [UILabel] = []
             for _ in 0..<labelCount - row {
                 let label = AnimatedLabel()
-                //label.text = "0"
+                
                 label.textAlignment = .right
                 label.textColor = UIColor.label.withAlphaComponent(0.6)
                 label.adjustsFontSizeToFitWidth = true
                 label.minimumScaleFactor = 0.8
                 label.font = .systemFont(ofSize: size, weight: .medium)
-                
-//                if space > 0 {
-//                    updateConstraintsfor(label: label)
-//                }
                 
                 rowLabels.append(label)
             }
@@ -181,6 +194,7 @@ extension ValuesView {
         }
     }
     
+    /// Updates width constraints for labels to distribute evenly per row.
     private func updateLablesConstraints() {
         let spacing: CGFloat = 8
         let segmentWidth = (bounds.width - spacing * 2) / CGFloat(segments.count)
@@ -194,6 +208,7 @@ extension ValuesView {
         }
     }
     
+    /// Highlights active segment and dims the rest depending on layout.
     private func updateLabelsColor() {
         if layoutType == .row {
             valueLabels[0][0].textColor = C.mazarineBlue//UIColor(red: 0.15, green: 0.24, blue: 0.46, alpha: 1.00)
@@ -208,165 +223,9 @@ extension ValuesView {
             
         }
     }
-
-//    private func updateLabelsValues() {
-//        guard let startDate, let endDate else { return }
-//        updateDirectionIcon()
-//        // вспомогательный короткий форматтер
-//        func f(_ value: Int?) -> String {
-//            guard let v = value else { return "0" }
-//            return abs(v).formatted(.number)
-//        }
-//        
-//        func animateLabelTextChange(_ label: UILabel, newText: String) {
-//            guard label.text != newText else { return }
-//            UIView.transition(with: label, duration: 0.25, options: [.transitionCrossDissolve, .allowUserInteraction], animations: { label.text = newText }, completion: nil)
-//        }
-//        
-//        if layoutType == .row {
-//            if segments.count == 4 {
-//                switch segmentIndex {
-//                case 0:
-//                    let diff = startDate.getDifference(to: endDate, components: .cYMWD)
-//                    let values = [f(diff.year), f(diff.month), f(diff.weekOfMonth), f(diff.day)]
-//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-//                        animateLabelTextChange(label, newText: values[i])
-//                    }
-//                case 1:
-//                    let diff = startDate.getDifference(to: endDate, components: .cMWD)
-//                    let values = [f(diff.month), f(diff.weekOfMonth), f(diff.day)]
-//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-//                        animateLabelTextChange(label, newText: values[i])
-//                    }
-//                case 2:
-//                    let diff = startDate.getDifference(to: endDate, components: .cWD)
-//                    let values = [f(diff.weekOfYear), f(diff.day)]
-//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-//                        animateLabelTextChange(label, newText: values[i])
-//                    }
-//                case 3:
-//                    let diff = startDate.getDifference(to: endDate, components: .cD)
-//                    let values = [f(diff.day)]
-//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-//                        animateLabelTextChange(label, newText: values[i])
-//                    }
-//                default: break
-//                }
-//            } else if segments.count == 3 && segments[1] == "Month" {
-//                switch segmentIndex {
-//                case 0:
-//                    let diff = startDate.getDifference(to: endDate, components: .cYMD)
-//                    let values = [f(diff.year), f(diff.month), f(diff.day)]
-//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-//                        animateLabelTextChange(label, newText: values[i])
-//                    }
-//                case 1:
-//                    let diff = startDate.getDifference(to: endDate, components: .cMD)
-//                    let values = [f(diff.month), f(diff.day)]
-//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-//                        animateLabelTextChange(label, newText: values[i])
-//                    }
-//                case 2:
-//                    let diff = startDate.getDifference(to: endDate, components: .cD)
-//                    let values = [f(diff.day)]
-//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-//                        animateLabelTextChange(label, newText: values[i])
-//                    }
-//                default: break
-//                }
-//            } else if segments.count == 3 && segments[1] == "Week" {
-//                switch segmentIndex {
-//                case 0:
-//                    let diff = startDate.getDifference(to: endDate, components: .cYWD)
-//                    let values = [f(diff.year), f(diff.weekOfYear), f(diff.day)]
-//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-//                        animateLabelTextChange(label, newText: values[i])
-//                    }
-//                case 1:
-//                    let diff = startDate.getDifference(to: endDate, components: .cWD)
-//                    let values = [f(diff.weekOfYear), f(diff.day)]
-//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-//                        animateLabelTextChange(label, newText: values[i])
-//                    }
-//                case 2:
-//                    let diff = startDate.getDifference(to: endDate, components: .cD)
-//                    let values = [f(diff.day)]
-//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-//                        animateLabelTextChange(label, newText: values[i])
-//                    }
-//                default: break
-//                }
-//            } else if segments.count == 2 {
-//                switch segmentIndex {
-//                case 0:
-//                    let diff = startDate.getDifference(to: endDate, components: .cYD)
-//                    let values = [f(diff.year), f(diff.day)]
-//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-//                        animateLabelTextChange(label, newText: values[i])
-//                    }
-//                case 1:
-//                    let diff = startDate.getDifference(to: endDate, components: .cD)
-//                    let values = [f(diff.day)]
-//                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-//                        animateLabelTextChange(label, newText: values[i])
-//                    }
-//                default: break
-//                }
-//            }
-//        } else if layoutType == .grid {
-//            var values = [[String]]()
-//            
-//            if segments.count == 4 {
-//                let diff0 = startDate.getDifference(to: endDate, components: .cYMWD)
-//                values.append([f(diff0.year), f(diff0.month), f(diff0.weekOfMonth), f(diff0.day)])
-//                
-//                let diff1 = startDate.getDifference(to: endDate, components: .cMWD)
-//                values.append([f(diff1.month), f(diff1.weekOfMonth), f(diff1.day)])
-//                
-//                let diff2 = startDate.getDifference(to: endDate, components: .cWD)
-//                values.append([f(diff2.weekOfYear), f(diff2.day)])
-//                
-//                let diff3 = startDate.getDifference(to: endDate, components: .cD)
-//                values.append([f(diff3.day)])
-//                
-//            } else if segments.count == 3 && segments[1] == "Month" {
-//                let diff0 = startDate.getDifference(to: endDate, components: .cYMD)
-//                values.append([f(diff0.year), f(diff0.month), f(diff0.day)])
-//                
-//                let diff1 = startDate.getDifference(to: endDate, components: .cMD)
-//                values.append([f(diff1.month), f(diff1.day)])
-//                
-//                let diff2 = startDate.getDifference(to: endDate, components: .cD)
-//                values.append([f(diff2.day)])
-//                
-//            } else if segments.count == 3 && segments[1] == "Week" {
-//                let diff0 = startDate.getDifference(to: endDate, components: .cYWD)
-//                values.append([f(diff0.year), f(diff0.weekOfYear), f(diff0.day)])
-//                
-//                let diff1 = startDate.getDifference(to: endDate, components: .cWD)
-//                values.append([f(diff1.weekOfYear), f(diff1.day)])
-//                
-//                let diff2 = startDate.getDifference(to: endDate, components: .cD)
-//                values.append([f(diff2.day)])
-//                
-//            } else if segments.count == 2 {
-//                let diff0 = startDate.getDifference(to: endDate, components: .cYD)
-//                values.append([f(diff0.year), f(diff0.day)])
-//                
-//                let diff1 = startDate.getDifference(to: endDate, components: .cD)
-//                values.append([f(diff1.day)])
-//            }
-//            
-//            // применяем к меткам
-//            for (rowIndex, rowLabels) in valueLabels.enumerated() where rowIndex < values.count {
-//                for (colIndex, label) in rowLabels.enumerated() where colIndex < values[rowIndex].count {
-//                    animateLabelTextChange(label, newText: values[rowIndex][colIndex])
-//                }
-//            }
-//        }
-//    }
-//}
-
+    
+    
+    /// Calculates values for all visible labels based on current `segments`, `segmentIndex`, and the `(startDate, endDate)` range.
     private func updateLabelsValues() {
         guard let startDate, let endDate else { return }
         updateDirectionIcon()
@@ -519,8 +378,9 @@ extension ValuesView {
         }
     }
 }
-    
+
 extension ValuesView {
+    /// Creates a small rounded badge with an arrow that indicates date order (→ or ←).
     private func setupDirectionView() {
         addSubview(directionView)
         directionView.translatesAutoresizingMaskIntoConstraints = false
@@ -532,25 +392,25 @@ extension ValuesView {
         directionView.layer.shadowOffset = CGSize(width: 0, height: 2.5)
         directionView.alpha = 1.0
         clipsToBounds = false
-
+        
         NSLayoutConstraint.activate([
             directionView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
             directionView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
             directionView.widthAnchor.constraint(equalToConstant: 20),
             directionView.heightAnchor.constraint(equalToConstant: 20)
         ])
-
+        
         setupDirectionIcon()
     }
     
+    /// Adds and constraints the arrow icon inside the direction badge.
     private func setupDirectionIcon() {
         directionView.addSubview(directionIcon)
         directionIcon.translatesAutoresizingMaskIntoConstraints = false
         directionIcon.contentMode = .scaleAspectFit
         directionIcon.tintColor = .systemGreen
-        //directionIcon.image = UIImage(systemName: "arrow.right", withConfiguration: UIImage.SymbolConfiguration(weight: .bold))
         directionIcon.alpha = 1.0
-
+        
         NSLayoutConstraint.activate([
             directionIcon.topAnchor.constraint(equalTo: directionView.topAnchor, constant: 2),
             directionIcon.bottomAnchor.constraint(equalTo: directionView.bottomAnchor, constant: -2),
@@ -559,6 +419,7 @@ extension ValuesView {
         ])
     }
     
+    /// Updates arrow direction and color based on whether `startDate` > `endDate`.
     private func updateDirectionIcon() {
         guard let startDate, let endDate else { return }
         let isReversed = startDate > endDate
@@ -578,23 +439,5 @@ extension ValuesView {
         }
     }
     
-//    private func updateDirectionIcon() {
-//        guard let startDate, let endDate else { return }
-//
-//        let isReversed = startDate > endDate
-//        let rotationAngle: CGFloat = isReversed ? .pi : 0 // поворот на 180° влево
-//        let color = isReversed ? UIColor.systemRed : UIColor.systemGreen
-//
-//        // Если иконка ещё не установлена
-//        if directionIcon.image == nil {
-//            let config = UIImage.SymbolConfiguration(pointSize: 13, weight: .bold)
-//            directionIcon.image = UIImage(systemName: "arrow.right", withConfiguration: config)
-//        }
-//
-//        // Анимация плавного поворота
-//        UIView.animate(withDuration: 0.35, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.3, options: [.curveEaseInOut]) {
-//            self.directionIcon.transform = CGAffineTransform(rotationAngle: rotationAngle)
-//            self.directionIcon.tintColor = color.withAlphaComponent(0.85)
-//        }
-//    }
+    
 }
