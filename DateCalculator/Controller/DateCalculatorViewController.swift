@@ -516,6 +516,7 @@ extension DateCalculatorViewController {
         let title1 = "Month"
         let title2 = "Week"
         let title3 = "Day"
+        let monthInYear = "\(12)"
         
         infoCards.updateCard(id: .westernZodiac, with: infoCard.ModelData(title: westernZodiac.title, icon: westernZodiac.icon, name: westernZodiac.name))
         infoCards.updateCard(id: .westernElement, with: infoCard.ModelData(title: westernElement.title, icon: westernElement.icon, name: westernElement.name))
@@ -524,7 +525,7 @@ extension DateCalculatorViewController {
         infoCards.updateCard(id: .chineseElement, with: infoCard.ModelData(title: chineseElement.title, icon: chineseElement.icon, name: chineseElement.name))
         infoCards.updateCard(id: .year, with: infoCard.ModelData(title: leapYear.title, icon: leapYear.symbol, name: leapYear.type.name, color: leapYear.color))
         infoCards.updateCard(id: .statistics, with: statCard.ModelData(dataTitle: date.weekDayName,
-                                                                       name1: title1, data1: date.mothOfYear, total1: date.monthsInYear,
+                                                                       name1: title1, data1: date.monthOfYear, total1: monthInYear,
                                                                        name2: title2, data2: date.weekOfYear, total2: date.weeksInYear,
                                                                        name3: title3, data3: date.dayOfYear, total3: date.daysInYear ))
     }

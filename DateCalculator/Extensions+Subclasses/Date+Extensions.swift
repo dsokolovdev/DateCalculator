@@ -9,83 +9,75 @@
 import Foundation
 
 // MARK: - Day and Time Utilities
+/// Common date properties and helpers for calendar-related calculations.
 extension Date {
     
-    /// Returns the start of the day (00:00:00) for the current date in the system calendar.
+    /// Returns the start of the day (00:00:00) in the current calendar.
     var startOfDay: Date {
         Calendar.current.startOfDay(for: self)
     }
     
-    /// Returns `true` if the current date is today.
+    /// Returns `true` if the date is today.
     var isToday: Bool {
         Calendar.current.isDateInToday(self)
     }
     
-    /// Returns a new date with the time set to midnight (00:00:00) in the same day.
-//    func atMidnight() -> Date {
-//        let calendar = Calendar.current
-//        let components = calendar.dateComponents([.year, .month, .day], from: self)
-//        return calendar.date(from: components) ?? self
-//    }
-    
-    var mothOfYear: String {
+    /// Returns the month number within the year as a string (1–12).
+    var monthOfYear: String {
         let month = Calendar.current.component(.month, from: self)
         return "\(month)"
     }
     
+    /// Returns the week number within the year as a string.
     var weekOfYear: String {
         let week = Calendar.current.component(.weekOfYear, from: self)
         return "\(week)"
     }
     
+    /// Returns the day number within the year as a string.
     var dayOfYear: String {
-        //let day = Calendar.current.ordinality(of: .dayOfYear, in: .year, for: self) ?? 0
         let day = Calendar.current.component(.dayOfYear, from: self)
         return "\(day)"
     }
     
+    /// Returns the weekday index (1 = Sunday, 7 = Saturday).
     var dayOfWeek: Int {
         Calendar.current.component(.weekday, from: self)
     }
     
-    /// Полное имя дня недели (например, "Friday")
+    /// Full name of the weekday (e.g. "Friday").
     var weekDayName: String {
-        let weekDay = Calendar.current.weekdaySymbols[self.dayOfWeek - 1]
-        return "\(weekDay)"
+        Calendar.current.weekdaySymbols[self.dayOfWeek - 1]
     }
     
-    /// Сокращённое имя дня недели (например, "Fri")
+    /// Short name of the weekday (e.g. "Fri").
     var shortWeekDayName: String {
         Calendar.current.shortWeekdaySymbols[self.dayOfWeek - 1]
     }
     
-    /// Количество дней в году
+    /// Number of days in the current year.
     var daysInYear: String {
-        let daysInYear = Calendar.current.range(of: .day, in: .year, for: self)?.count ?? 0
-        return "\(daysInYear)"
+        let days = Calendar.current.range(of: .day, in: .year, for: self)?.count ?? 0
+        return "\(days)"
     }
     
-    /// Количество недель в году
+    /// Number of weeks in the current year.
     var weeksInYear: String {
-        let weeksInYear = Calendar.current.range(of: .weekOfYear, in: .year, for: self)?.count ?? 0
-        return "\(weeksInYear)"
-    }
-    
-    /// Количество месяцев в году
-    var monthsInYear: String {
-        let monthInYear = Calendar.current.range(of: .month, in: .year, for: self)?.count ?? 0
-        return "\(monthInYear)"
+        let weeks = Calendar.current.range(of: .weekOfYear, in: .year, for: self)?.count ?? 0
+        return "\(weeks)"
     }
 }
 
 // MARK: - Leap Year Detection
+/// Determines whether the current year is a leap year.
 extension Date {
     
     /// Returns `true` if the year of the current date is a leap year.
     var isLeapYear: Bool {
         let year = Calendar.current.component(.year, from: self)
         guard let february = Calendar.current.date(from: DateComponents(year: year, month: 2)),
-              let days = Calendar.current.range(of: .day, in: .month, for: february) else {
+              let days = Calendar.current.range(of: .day, in: .month, for: february)
+        else {
             return false
         }
         return days.count == 29
@@ -93,42 +85,54 @@ extension Date {
 }
 
 // MARK: - Date Formatting Helpers
+/// String formatting utilities for display and short keys.
 extension Date {
     
-    /// Returns a short key in the format "MMdd" (e.g. 0415 for April 15).
-    /// Useful for horoscope or seasonal date ranges.
+    /// Returns a short numeric key in the format "MMdd" (e.g. `0415` for April 15).
+    /// Useful for horoscope or seasonal range calculations.
     var mdKey: Int {
         Int(self.formatted(.iso8601.month().day().dateSeparator(.omitted))) ?? 0
     }
     
-    /// Returns a string formatted as "d MMM yyyy" (e.g. 15 Oct 2025).
+    /// Returns the date formatted as `"d MMM yyyy"` (e.g. `15 Oct 2025`).
     var readableFormat: String {
+        Date.sharedFormatter.string(from: self)
+    }
+    
+    /// Static cached formatter to avoid recreation overhead.
+    private static let sharedFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "d MMM yyyy"
-        return formatter.string(from: self)
-    }
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        return formatter
+    }()
 }
 
+// MARK: - Date Components Difference
+/// Utility for computing differences between dates using pre-defined component sets.
 extension Date {
     
+    /// Predefined component combinations for flexible date differences.
     enum Components {
         case cYMWD, cYMD, cYWD, cMWD, cYD, cMD, cWD, cD
         
+        /// The corresponding `Calendar.Component` set for each case.
         fileprivate var values: Set<Calendar.Component> {
             switch self {
             case .cYMWD: return [.year, .month, .weekOfMonth, .day]
-            case .cYMD: return [.year, .month, .day]
-            case .cYWD: return [.year, .weekOfYear, .day]
-            case .cMWD: return [.month, .weekOfMonth, .day]
-            case .cYD: return [.year, .day]
-            case .cMD: return [.month, .day]
-            case .cWD: return [.weekOfYear, .day]
-            case .cD: return [.day]
-            
+            case .cYMD:  return [.year, .month, .day]
+            case .cYWD:  return [.year, .weekOfYear, .day]
+            case .cMWD:  return [.month, .weekOfMonth, .day]
+            case .cYD:   return [.year, .day]
+            case .cMD:   return [.month, .day]
+            case .cWD:   return [.weekOfYear, .day]
+            case .cD:    return [.day]
             }
         }
     }
     
+    /// Returns a `DateComponents` difference between `self` and another date
+    /// based on the selected component combination.
     func getDifference(to date: Date, components: Components) -> DateComponents {
         Calendar.current.dateComponents(components.values, from: self, to: date)
     }
