@@ -21,15 +21,23 @@ final class ValuesView: UIView, LayoutDisplayable {
     var layoutType: LayoutType = .row { didSet { refreshLayout() } }
     
     // MARK: - Private Properties
+    /// Visible period names (e.g., ["Year", "Month", "Week", "Day"]).
     private var segments: [String] = []
+    /// Currently selected segment index (used to emphasize the active column/row).
     private var segmentIndex: Int = 0
+    /// Start and end dates for difference calculation.
     private var startDate: Date?
     private var endDate: Date?
     
+    /// 2D matrix of value labels. In `.row` mode it's one row; in `.grid` mode row count == segments.count.
     private var valueLabels = [[UILabel]]()
+    /// Cached number of rows based on layout.
     private var rows: Int = 1
+    /// Guards against repeated initial layout refresh on first layout pass.
     private var hasLaidOutOnce = false
+    /// Small arrow image that indicates direction (start → end or start ← end).
     private let directionIcon = UIImageView()
+    /// Container view for the direction arrow (rounded, with subtle shadow).
     private let directionView = UIView()
     
     // MARK: - Init
@@ -45,11 +53,13 @@ final class ValuesView: UIView, LayoutDisplayable {
         setupDirectionView()
     }
     
+    // MARK: - Layout Cycle
+    /// Performs first-time layout refresh and updates width constraints each pass.
     override func layoutSubviews() {
         super.layoutSubviews()
         guard !segments.isEmpty else { return }
         
-        updateLablesConstraints()
+        updateLabelsConstraints()
         
         if !hasLaidOutOnce {
             hasLaidOutOnce = true
@@ -79,7 +89,7 @@ final class ValuesView: UIView, LayoutDisplayable {
     }
 }
 
-//MARK: - Delegate
+//MARK: - Delegate (ValuesViewUpdatable)
 extension ValuesView: ValuesViewUpdatable {
     /// Receives new segments / selected index / dates from the ViewModel and updates the view.
     /// - Parameters:
@@ -96,14 +106,14 @@ extension ValuesView: ValuesViewUpdatable {
         self.endDate = end
         
         if shouldRefresh {
-            refreshLayout()        // пересоздаём лейблы и стек
+            refreshLayout()        // Recreate labels and stacks only when layout type or visible segments change
         } else {
-            updateLabelsValues()   // просто обновляем цифры
+            updateLabelsValues()   // update labels text
         }
     }
 }
 
-//MARK: - View
+//MARK: - View Appearance
 extension ValuesView {
     /// Configures background, corner radius and subtle shadow.
     private func setupAppearance() {
@@ -116,9 +126,12 @@ extension ValuesView {
     }
 }
 
-//MARK: - SubView
+//MARK: - Subviews & Containers
 extension ValuesView {
     /// Rebuilds subviews according to the current `layoutType`.
+    /// Removes previous stacks (but keeps directionView) and inserts a single container:
+    ///  - `.row`: one horizontal stack with labels
+    ///  - `.grid`: vertical stack containing multiple horizontal stacks
     private func updateViews() {
         
         subviews.filter { $0 != directionView }.forEach { $0.removeFromSuperview() }
@@ -154,6 +167,7 @@ extension ValuesView {
     }
     
     /// Adds a subview and pins it with consistent insets.
+    /// This ensures uniform padding regardless of layout mode.
     private func addNewSubview(_ subview: UIView) {
         addSubview(subview)
         subview.translatesAutoresizingMaskIntoConstraints = false
@@ -166,13 +180,16 @@ extension ValuesView {
     }
 }
 
-// MARK: - Lables
+// MARK: - Labels (Create / Size / Color / Values)
 extension ValuesView {
     
+    // MARK: Create
     /// Recreates the labels matrix (1 row for `.row`, N rows for `.grid`).
+    /// Called from `refreshLayout()` before rebuilding container stacks.
     private func updateLabels() {
         valueLabels.removeAll()
         rows = layoutType == .row ? 1 : segments.count
+        
         let fontSize = (max: 32.0, min: 20.0)
         let size = layoutType == .row ? fontSize.max : fontSize.max - (fontSize.max - fontSize.min)/4 * Double(segments.count)
         let labelCount = layoutType == .row ? segments.count - segmentIndex : segments.count
@@ -194,8 +211,10 @@ extension ValuesView {
         }
     }
     
+    // MARK: Size (Constraints)
     /// Updates width constraints for labels to distribute evenly per row.
-    private func updateLablesConstraints() {
+    /// Width is applied to labels with index > 0 to keep the first value flexible.
+    private func updateLabelsConstraints() {
         let spacing: CGFloat = 8
         let segmentWidth = (bounds.width - spacing * 2) / CGFloat(segments.count)
         for row in valueLabels {
@@ -208,8 +227,12 @@ extension ValuesView {
         }
     }
     
+    // MARK: Color
     /// Highlights active segment and dims the rest depending on layout.
+    /// Safeguards against index issues when segments/labels change asynchronously.
     private func updateLabelsColor() {
+        guard valueLabels.indices.contains(segmentIndex), valueLabels[segmentIndex].indices.contains(0) else { return }
+        
         if layoutType == .row {
             valueLabels[0][0].textColor = C.mazarineBlue//UIColor(red: 0.15, green: 0.24, blue: 0.46, alpha: 1.00)
         } else if layoutType == .grid {
@@ -224,161 +247,176 @@ extension ValuesView {
         }
     }
     
-    
+    // MARK: Values (Calculations)
     /// Calculates values for all visible labels based on current `segments`, `segmentIndex`, and the `(startDate, endDate)` range.
     private func updateLabelsValues() {
         guard let startDate, let endDate else { return }
         updateDirectionIcon()
+        
         // вспомогательный короткий форматтер
-        func f(_ value: Int?) -> String {
+        func formatter(_ value: Int?) -> String {
             guard let v = value else { return "0" }
             return abs(v).formatted(.number)
         }
         
         if layoutType == .row {
-            if segments.count == 4 {
-                switch segmentIndex {
-                case 0:
-                    let diff = startDate.getDifference(to: endDate, components: .cYMWD)
-                    let values = [f(diff.year), f(diff.month), f(diff.weekOfMonth), f(diff.day)]
-                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
-                    }
-                case 1:
-                    let diff = startDate.getDifference(to: endDate, components: .cMWD)
-                    let values = [f(diff.month), f(diff.weekOfMonth), f(diff.day)]
-                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
-                    }
-                case 2:
-                    let diff = startDate.getDifference(to: endDate, components: .cWD)
-                    let values = [f(diff.weekOfYear), f(diff.day)]
-                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
-                    }
-                case 3:
-                    let diff = startDate.getDifference(to: endDate, components: .cD)
-                    let values = [f(diff.day)]
-                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
-                    }
-                default: break
-                }
-            } else if segments.count == 3 && segments[1] == "Month" {
-                switch segmentIndex {
-                case 0:
-                    let diff = startDate.getDifference(to: endDate, components: .cYMD)
-                    let values = [f(diff.year), f(diff.month), f(diff.day)]
-                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
-                    }
-                case 1:
-                    let diff = startDate.getDifference(to: endDate, components: .cMD)
-                    let values = [f(diff.month), f(diff.day)]
-                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
-                    }
-                case 2:
-                    let diff = startDate.getDifference(to: endDate, components: .cD)
-                    let values = [f(diff.day)]
-                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
-                    }
-                default: break
-                }
-            } else if segments.count == 3 && segments[1] == "Week" {
-                switch segmentIndex {
-                case 0:
-                    let diff = startDate.getDifference(to: endDate, components: .cYWD)
-                    let values = [f(diff.year), f(diff.weekOfYear), f(diff.day)]
-                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
-                    }
-                case 1:
-                    let diff = startDate.getDifference(to: endDate, components: .cWD)
-                    let values = [f(diff.weekOfYear), f(diff.day)]
-                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
-                    }
-                case 2:
-                    let diff = startDate.getDifference(to: endDate, components: .cD)
-                    let values = [f(diff.day)]
-                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
-                    }
-                default: break
-                }
-            } else if segments.count == 2 {
-                switch segmentIndex {
-                case 0:
-                    let diff = startDate.getDifference(to: endDate, components: .cYD)
-                    let values = [f(diff.year), f(diff.day)]
-                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
-                    }
-                case 1:
-                    let diff = startDate.getDifference(to: endDate, components: .cD)
-                    let values = [f(diff.day)]
-                    for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
-                        label.text = values[i]
-                    }
-                default: break
-                }
-            }
+            updateValuesForRowLayout(startDate: startDate, endDate: endDate, f: formatter)
+            
         } else if layoutType == .grid {
-            var values = [[String]]()
+            updateValuesForGridLayout(startDate: startDate, endDate: endDate, f: formatter)
+        }
+    }
+    
+    // MARK: - Calculation Helpers (Grid)
+    /// Populates `valueLabels` for `.grid` layout. Each row corresponds to the segment view starting at a certain level.
+    private func updateValuesForGridLayout(startDate: Date, endDate: Date, f: (Int?) -> String) {
+        var values = [[String]]()
+        
+        if segments.count == 4 {
+            let diff0 = startDate.getDifference(to: endDate, components: .cYMWD)
+            values.append([f(diff0.year), f(diff0.month), f(diff0.weekOfMonth), f(diff0.day)])
             
-            if segments.count == 4 {
-                let diff0 = startDate.getDifference(to: endDate, components: .cYMWD)
-                values.append([f(diff0.year), f(diff0.month), f(diff0.weekOfMonth), f(diff0.day)])
-                
-                let diff1 = startDate.getDifference(to: endDate, components: .cMWD)
-                values.append([f(diff1.month), f(diff1.weekOfMonth), f(diff1.day)])
-                
-                let diff2 = startDate.getDifference(to: endDate, components: .cWD)
-                values.append([f(diff2.weekOfYear), f(diff2.day)])
-                
-                let diff3 = startDate.getDifference(to: endDate, components: .cD)
-                values.append([f(diff3.day)])
-                
-            } else if segments.count == 3 && segments[1] == "Month" {
-                let diff0 = startDate.getDifference(to: endDate, components: .cYMD)
-                values.append([f(diff0.year), f(diff0.month), f(diff0.day)])
-                
-                let diff1 = startDate.getDifference(to: endDate, components: .cMD)
-                values.append([f(diff1.month), f(diff1.day)])
-                
-                let diff2 = startDate.getDifference(to: endDate, components: .cD)
-                values.append([f(diff2.day)])
-                
-            } else if segments.count == 3 && segments[1] == "Week" {
-                let diff0 = startDate.getDifference(to: endDate, components: .cYWD)
-                values.append([f(diff0.year), f(diff0.weekOfYear), f(diff0.day)])
-                
-                let diff1 = startDate.getDifference(to: endDate, components: .cWD)
-                values.append([f(diff1.weekOfYear), f(diff1.day)])
-                
-                let diff2 = startDate.getDifference(to: endDate, components: .cD)
-                values.append([f(diff2.day)])
-                
-            } else if segments.count == 2 {
-                let diff0 = startDate.getDifference(to: endDate, components: .cYD)
-                values.append([f(diff0.year), f(diff0.day)])
-                
-                let diff1 = startDate.getDifference(to: endDate, components: .cD)
-                values.append([f(diff1.day)])
+            let diff1 = startDate.getDifference(to: endDate, components: .cMWD)
+            values.append([f(diff1.month), f(diff1.weekOfMonth), f(diff1.day)])
+            
+            let diff2 = startDate.getDifference(to: endDate, components: .cWD)
+            values.append([f(diff2.weekOfYear), f(diff2.day)])
+            
+            let diff3 = startDate.getDifference(to: endDate, components: .cD)
+            values.append([f(diff3.day)])
+            
+        } else if segments.count == 3 && segments[1] == "Month" {
+            let diff0 = startDate.getDifference(to: endDate, components: .cYMD)
+            values.append([f(diff0.year), f(diff0.month), f(diff0.day)])
+            
+            let diff1 = startDate.getDifference(to: endDate, components: .cMD)
+            values.append([f(diff1.month), f(diff1.day)])
+            
+            let diff2 = startDate.getDifference(to: endDate, components: .cD)
+            values.append([f(diff2.day)])
+            
+        } else if segments.count == 3 && segments[1] == "Week" {
+            let diff0 = startDate.getDifference(to: endDate, components: .cYWD)
+            values.append([f(diff0.year), f(diff0.weekOfYear), f(diff0.day)])
+            
+            let diff1 = startDate.getDifference(to: endDate, components: .cWD)
+            values.append([f(diff1.weekOfYear), f(diff1.day)])
+            
+            let diff2 = startDate.getDifference(to: endDate, components: .cD)
+            values.append([f(diff2.day)])
+            
+        } else if segments.count == 2 {
+            let diff0 = startDate.getDifference(to: endDate, components: .cYD)
+            values.append([f(diff0.year), f(diff0.day)])
+            
+            let diff1 = startDate.getDifference(to: endDate, components: .cD)
+            values.append([f(diff1.day)])
+        }
+        
+        // применяем к меткам
+        for (rowIndex, rowLabels) in valueLabels.enumerated() where rowIndex < values.count {
+            for (colIndex, label) in rowLabels.enumerated() where colIndex < values[rowIndex].count {
+                label.text = values[rowIndex][colIndex]
             }
-            
-            // применяем к меткам
-            for (rowIndex, rowLabels) in valueLabels.enumerated() where rowIndex < values.count {
-                for (colIndex, label) in rowLabels.enumerated() where colIndex < values[rowIndex].count {
-                    label.text = values[rowIndex][colIndex]
+        }
+    }
+    
+    // MARK: - Calculation Helpers (Row)
+    /// Populates `valueLabels` for `.row` layout. The single horizontal row changes depending on selected segment index.
+    private func updateValuesForRowLayout(startDate: Date, endDate: Date, f: (Int?) -> String) {
+        if segments.count == 4 {
+            switch segmentIndex {
+            case 0:
+                let diff = startDate.getDifference(to: endDate, components: .cYMWD)
+                let values = [f(diff.year), f(diff.month), f(diff.weekOfMonth), f(diff.day)]
+                for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                    label.text = values[i]
                 }
+            case 1:
+                let diff = startDate.getDifference(to: endDate, components: .cMWD)
+                let values = [f(diff.month), f(diff.weekOfMonth), f(diff.day)]
+                for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                    label.text = values[i]
+                }
+            case 2:
+                let diff = startDate.getDifference(to: endDate, components: .cWD)
+                let values = [f(diff.weekOfYear), f(diff.day)]
+                for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                    label.text = values[i]
+                }
+            case 3:
+                let diff = startDate.getDifference(to: endDate, components: .cD)
+                let values = [f(diff.day)]
+                for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                    label.text = values[i]
+                }
+            default: break
+            }
+        } else if segments.count == 3 && segments[1] == "Month" {
+            switch segmentIndex {
+            case 0:
+                let diff = startDate.getDifference(to: endDate, components: .cYMD)
+                let values = [f(diff.year), f(diff.month), f(diff.day)]
+                for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                    label.text = values[i]
+                }
+            case 1:
+                let diff = startDate.getDifference(to: endDate, components: .cMD)
+                let values = [f(diff.month), f(diff.day)]
+                for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                    label.text = values[i]
+                }
+            case 2:
+                let diff = startDate.getDifference(to: endDate, components: .cD)
+                let values = [f(diff.day)]
+                for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                    label.text = values[i]
+                }
+            default: break
+            }
+        } else if segments.count == 3 && segments[1] == "Week" {
+            switch segmentIndex {
+            case 0:
+                let diff = startDate.getDifference(to: endDate, components: .cYWD)
+                let values = [f(diff.year), f(diff.weekOfYear), f(diff.day)]
+                for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                    label.text = values[i]
+                }
+            case 1:
+                let diff = startDate.getDifference(to: endDate, components: .cWD)
+                let values = [f(diff.weekOfYear), f(diff.day)]
+                for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                    label.text = values[i]
+                }
+            case 2:
+                let diff = startDate.getDifference(to: endDate, components: .cD)
+                let values = [f(diff.day)]
+                for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                    label.text = values[i]
+                }
+            default: break
+            }
+        } else if segments.count == 2 {
+            switch segmentIndex {
+            case 0:
+                let diff = startDate.getDifference(to: endDate, components: .cYD)
+                let values = [f(diff.year), f(diff.day)]
+                for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                    label.text = values[i]
+                }
+            case 1:
+                let diff = startDate.getDifference(to: endDate, components: .cD)
+                let values = [f(diff.day)]
+                for (i, label) in (valueLabels.first ?? []).enumerated() where i < values.count {
+                    label.text = values[i]
+                }
+            default: break
             }
         }
     }
 }
 
+// MARK: - Direction Indicator (Arrow)
 extension ValuesView {
     /// Creates a small rounded badge with an arrow that indicates date order (→ or ←).
     private func setupDirectionView() {
@@ -421,6 +459,7 @@ extension ValuesView {
     
     /// Updates arrow direction and color based on whether `startDate` > `endDate`.
     private func updateDirectionIcon() {
+        
         guard let startDate, let endDate else { return }
         let isReversed = startDate > endDate
         
@@ -438,6 +477,4 @@ extension ValuesView {
             self.directionIcon.alpha = 1.0
         }
     }
-    
-    
 }
