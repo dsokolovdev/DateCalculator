@@ -11,53 +11,57 @@
 
 import Foundation
 
-// MARK: - Protocols
-/// A base protocol for all setting items.
+// MARK: - Base Protocols
+/// A base protocol for all settings items.
 /// Each item must have a `name` used as an identifier or display label.
 protocol SettingsProtocol {
     var name: String { get }
 }
 
-/// Delegate protocol for handling global actions such as resetting all settings.
+/// Delegate protocol for handling global settings actions,
+/// such as resetting all settings to default values.
 protocol SettingsActionDeleagate: AnyObject {
     func resetToDefaults()
 }
 
-// MARK: - Settings Data Structure
+// MARK: - Settings Configuration
 /// Represents the complete configuration of the Settings screen,
-/// including sections and an optional footer text.
+/// including all sections and optional footer text.
 struct Settings {
+    
     /// The title displayed at the top of the Settings screen.
     static var title: String = K.Titles.settingsScreenName
     
     /// The grouped sections containing all settings.
     var sections: [SettingsSection]
     
-    /// Optional footer text displayed at the bottom of the table.
+    /// Optional footer text displayed at the bottom of the Settings table.
     var footerText: String?
 }
 
-/// Represents a single section inside the Settings screen.
-/// A section contains a title and one or more setting items.
+// MARK: - Section
+/// Represents a logical group of settings displayed under one header.
+/// Each section contains a title and a list of settings items.
 struct SettingsSection {
-    /// The title of the section, displayed as a header.
+    
+    /// The title of the section, displayed as a header in the table.
     var title: String
     
-    /// The list of setting items contained in this section.
+    /// The list of items contained within this section.
     var items: [SettingsProtocol]
 }
 
 // MARK: - Switch Item
-
-/// Represents a switch-type setting (e.g., a toggle for enabling/disabling features).
+/// Represents a toggle-type setting, such as a feature enable/disable option.
 struct SwitchItem: SettingsProtocol {
-    /// The display name of the switch.
+    
+    /// The display name of the switch item.
     let name: String
     
     /// The current ON/OFF state.
     var isOn: Bool
     
-    /// The default state (used for Reset to Defaults).
+    /// The default state (used for the Reset to Defaults action).
     let defaultState: Bool
     
     /// Resets the switch to its default value.
@@ -67,8 +71,9 @@ struct SwitchItem: SettingsProtocol {
 }
 
 // MARK: - Button Item
-/// Represents a button-type setting (e.g., “Reset to Defaults”).
+/// Represents a button-type setting, such as “Reset to Defaults”.
 struct ButtonItem: SettingsProtocol {
+    
     /// The display name of the button.
     let name: String
     
@@ -76,12 +81,12 @@ struct ButtonItem: SettingsProtocol {
     let buttonTitle: String
     
     /// Whether the button is currently enabled or disabled.
-    var isEnabled: Bool 
+    var isEnabled: Bool
     
-    /// Delegate responsible for performing the associated action.
+    /// Delegate responsible for handling the button’s action.
     var delegate: SettingsActionDeleagate?
     
-    /// Changes the button's active state.
+    /// Updates the button’s enabled/disabled state.
     mutating func changeButtonState(to newValue: Bool) {
         isEnabled = newValue
     }
