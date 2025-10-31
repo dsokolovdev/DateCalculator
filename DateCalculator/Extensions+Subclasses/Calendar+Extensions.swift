@@ -3,61 +3,71 @@
 //  DateCalculator
 //
 //  Created by Dmitry Sokolov on 21.10.2025.
-//  Utility extensions for convenient calendar calculations.
+//
+//  Description:
+//  Utility extensions providing convenient calendar calculations
+//  such as month boundaries, date ranges, and weekday lookups.
 //
 
 import Foundation
 
 // MARK: - Calendar Utilities
+/// A collection of helper methods for working with `Calendar` and `Date` values.
 extension Calendar {
     
-    /// Returns the number of days in the given month of the given date.
+    // MARK: - Month Calculations
+    
+    /// Returns the total number of days in the given month.
     func daysInMonth(for date: Date) -> Int {
-        guard let range = self.range(of: .day, in: .month, for: date) else { return 0 }
-        return range.count
+        range(of: .day, in: .month, for: date)?.count ?? 0
     }
     
-    /// Returns the first day of the month for a given date.
+    /// Returns the first day of the month for the given date.
     func firstDayOfMonth(for date: Date) -> Date {
         let components = dateComponents([.year, .month], from: date)
         return self.date(from: components) ?? date
     }
     
-    /// Returns the last day of the month for a given date.
+    /// Returns the last day of the month for the given date.
     func lastDayOfMonth(for date: Date) -> Date {
         let firstDay = firstDayOfMonth(for: date)
-        let components = DateComponents(month: 1, day: -1)
-        return self.date(byAdding: components, to: firstDay) ?? date
+        let offset = DateComponents(month: 1, day: -1)
+        return self.date(byAdding: offset, to: firstDay) ?? date
     }
     
-    /// Returns the number of days between two dates.
+    // MARK: - Date Range and Comparison
+    
+    /// Returns the number of full days between two dates.
     func daysBetween(_ start: Date, _ end: Date) -> Int {
-        let startOfStart = self.startOfDay(for: start)
-        let startOfEnd = self.startOfDay(for: end)
-        let components = dateComponents([.day], from: startOfStart, to: startOfEnd)
-        return components.day ?? 0
+        let startOfStart = startOfDay(for: start)
+        let startOfEnd = startOfDay(for: end)
+        return dateComponents([.day], from: startOfStart, to: startOfEnd).day ?? 0
     }
     
-    /// Returns `true` if the date is a weekend.
+    /// Returns `true` if the specified date falls on a weekend.
     func isWeekend(_ date: Date) -> Bool {
-        return isDateInWeekend(date)
+        isDateInWeekend(date)
     }
     
-    /// Returns the weekday name (e.g., "Monday").
-    func weekdayName(for date: Date, locale: Locale = .current) -> String {
-        let weekdayIndex = component(.weekday, from: date)
-        return weekdaySymbols[weekdayIndex - 1].capitalized(with: locale)
-    }
-
-    /// Returns a list of all dates between two given dates (inclusive).
+    /// Returns an array of all dates between two given dates (inclusive).
     func generateDates(between startDate: Date, and endDate: Date) -> [Date] {
         var dates: [Date] = []
         var currentDate = startDate.startOfDay
+        
         while currentDate <= endDate.startOfDay {
             dates.append(currentDate)
-            guard let nextDate = self.date(byAdding: .day, value: 1, to: currentDate) else { break }
-            currentDate = nextDate
+            guard let next = date(byAdding: .day, value: 1, to: currentDate) else { break }
+            currentDate = next
         }
+        
         return dates
+    }
+    
+    // MARK: - Weekday Helpers
+    
+    /// Returns the localized name of the weekday (e.g. `"Monday"`).
+    func weekdayName(for date: Date, locale: Locale = .current) -> String {
+        let index = component(.weekday, from: date)
+        return weekdaySymbols[index - 1].capitalized(with: locale)
     }
 }
