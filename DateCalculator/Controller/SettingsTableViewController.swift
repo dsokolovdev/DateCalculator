@@ -2,7 +2,7 @@
 //  SettingsTableViewController.swift
 //  DateCalculator
 //
-//  Created by Dmitry Sokolov on 2025.
+//  Created by Dmitry Sokolov on 21.10.2025.
 //
 //  Description:
 //  Displays and manages the Settings screen of the app.
@@ -12,9 +12,11 @@
 
 import UIKit
 
+// MARK: - Settings Table View Controller
 /// A table view controller that manages all settings items,
 /// including switches, reset button, and footer display.
-final class SettingsTableViewController: UITableViewController{
+final class SettingsTableViewController: UITableViewController {
+    
     // MARK: - Initialization
     private let settingsModel: SettingsModel
     private let impactFeedback = UIImpactFeedbackGenerator(style: .light)
@@ -23,11 +25,6 @@ final class SettingsTableViewController: UITableViewController{
         self.settingsModel = settingsModel
         super.init(style: .insetGrouped)
     }
-    
-    /// Initializes the controller using an insetGrouped style to match system Settings UI.
-    //    init() {
-    //        super.init(style: .insetGrouped)
-    //    }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -61,7 +58,7 @@ final class SettingsTableViewController: UITableViewController{
         // Configure footer view
         configureFooter()
         
-        // 🔧 Отключаем эффект прокрутки / растяжения
+        // Disable overscroll/bounce effect
         tableView.bounces = false
     }
     
@@ -72,7 +69,7 @@ final class SettingsTableViewController: UITableViewController{
     }
 }
 
-//MARK: - Delegate
+// MARK: - Settings Delegate
 extension SettingsTableViewController: SettingsActionDeleagate {
     /// Called when the Reset to Defaults action is triggered via delegate.
     func resetToDefaults() {
@@ -96,7 +93,8 @@ extension SettingsTableViewController {
     }
     
     /// Configures and returns each cell in the Settings table.
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView,
+                            cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let section = sections[indexPath.section]
         let item = section.items[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: K.cellIdentifier, for: indexPath)
@@ -121,7 +119,6 @@ extension SettingsTableViewController {
             button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
             button.contentHorizontalAlignment = .right
             button.sizeToFit()
-            //button.frame = CGRect(x: 0, y: 0, width: 130, height: 34)
             cell.accessoryView = button
         }
         
@@ -132,16 +129,19 @@ extension SettingsTableViewController {
 // MARK: - UITableViewDelegate
 extension SettingsTableViewController {
     
-    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView,
+                            titleForHeaderInSection section: Int) -> String? {
         sections[section].title
     }
     
-    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        40 // Adds more space between sections
+    /// Adds more space between sections for better visual separation.
+    override func tableView(_ tableView: UITableView,
+                            heightForHeaderInSection section: Int) -> CGFloat {
+        40
     }
 }
 
-// MARK: - UI Setup
+// MARK: - Footer Setup
 extension SettingsTableViewController {
     
     /// Configures and attaches a custom footer view at the bottom of the table.
@@ -172,8 +172,8 @@ extension SettingsTableViewController {
 // MARK: - Actions
 extension SettingsTableViewController {
     
-    /// Handles changes to switch values.
-    @objc func switchChanged(_ sender: UISwitch) {
+    /// Handles toggle switch value changes and updates the model.
+    @objc private func switchChanged(_ sender: UISwitch) {
         let sectionIndex = sender.tag / 100
         let rowIndex = sender.tag % 100
         let key = sections[sectionIndex].items[rowIndex].name
@@ -181,16 +181,14 @@ extension SettingsTableViewController {
         settingsModel.updateSwitchState(for: key, to: sender.isOn)
         settingsModel.updateResetButtonState()
         
-        // Reload only the section with the Reset button
-        //tableView.reloadSections(IndexSet(integer: sections.count - 1), with: .none)
         if let buttonItem = sections.last?.items.first as? ButtonItem {
-            // Обновляем состояние кнопки без reload — нужно для плавной анимации
-                animateResetButtonState(enabled: buttonItem.isEnabled)
-            }
+            // Update reset button state smoothly (no reload)
+            animateResetButtonState(enabled: buttonItem.isEnabled)
+        }
     }
     
-    /// Handles Reset button tap.
-    @objc func buttonTapped(_ sender: UIButton) {
+    /// Handles the Reset button tap event.
+    @objc private func buttonTapped(_ sender: UIButton) {
         impactFeedback.impactOccurred()
         let sectionIndex = sender.tag / 100
         let rowIndex = sender.tag % 100
@@ -200,19 +198,20 @@ extension SettingsTableViewController {
     }
 }
 
+// MARK: - Animations
 extension SettingsTableViewController {
     
+    /// Animates the Reset button enable/disable state.
     private func animateResetButtonState(enabled: Bool) {
-        // Reset — всегда последняя секция, первая строка
+        // Reset — always the last section, first row
         let indexPath = IndexPath(row: 0, section: sections.count - 1)
-
-        // Берём живую кнопку с экрана
+        
+        // Access visible button directly from table cell
         guard let cell = tableView.cellForRow(at: indexPath),
               let button = cell.accessoryView as? UIButton else {
             return
         }
         
         button.isEnabled = enabled
-        //button.alpha = enabled ? 1.0 : 0.5
     }
 }

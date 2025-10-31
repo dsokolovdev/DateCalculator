@@ -2,7 +2,7 @@
 //  Settings.swift
 //  DateCalculator
 //
-//  Created by Dmitry Sokolov on 2025.
+//  Created by Dmitry Sokolov on 21.10.2025.
 //
 //  Description:
 //  Defines the data structures and protocols used by the Settings screen.

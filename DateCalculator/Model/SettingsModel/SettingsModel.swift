@@ -2,7 +2,7 @@
 //  SettingsModel.swift
 //  DateCalculator
 //
-//  Created by Dmitry Sokolov on 2025.
+//  Created by Dmitry Sokolov on 21.10.2025.
 //
 //  Description:
 //  ViewModel responsible for managing Settings data and business logic.
@@ -194,11 +194,5 @@ extension SettingsModel {
         print(segments)
         return segments
     }
-    
-//    var visibleRowLables: [String] {
-//        return visibleSegments
-//        
-//        
-//    }
 }
 
