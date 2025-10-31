@@ -2,8 +2,7 @@
 //  DateCalculatorModel.swift
 //  DateCalculator
 //
-//  Created by Dmitry Sokolov on 2025.
-//
+//  Created by Dmitry on 18.10.25.
 
 import Foundation
 
