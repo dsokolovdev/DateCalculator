@@ -36,9 +36,18 @@ extension Date {
     
     /// Returns the day number within the year as a string.
     var dayOfYear: String {
-        let day = Calendar.current.component(.dayOfYear, from: self)
-        return "\(day)"
-    }
+            let calendar = Calendar.current
+            
+            // iOS 18+: use native API
+            if #available(iOS 18, *) {
+                let day = calendar.component(.dayOfYear, from: self)
+                return "\(day)"
+            }
+            
+            // iOS 13–17: fallback
+            let day = calendar.ordinality(of: .day, in: .year, for: self) ?? 0
+            return "\(day)"
+        }
     
     /// Returns the weekday index (1 = Sunday, 7 = Saturday).
     var dayOfWeek: Int {
