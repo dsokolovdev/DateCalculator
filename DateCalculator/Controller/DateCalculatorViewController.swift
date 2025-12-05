@@ -25,7 +25,6 @@ final class DateCalculatorViewController: UIViewController {
         didSet { valuesView.layoutType = currentLayout }
     }
     
-    private var isCalculateModeActive = false
     private var isSelectingStartDate = true
     
     private var valueLabels: [UILabel] = []
@@ -34,7 +33,6 @@ final class DateCalculatorViewController: UIViewController {
     
     // MARK: - Navigation Items
     private var settingsButton: UIBarButtonItem!
-    private var calculateButton: UIBarButtonItem!
     private var viewButton: UIBarButtonItem!
     
     // MARK: - UI Elements
@@ -118,7 +116,7 @@ final class DateCalculatorViewController: UIViewController {
 // MARK: - Navigation Bar Setup
 extension DateCalculatorViewController {
     
-    /// Configures the navigation bar with Settings, Layout, and Calculate buttons.
+    /// Configures the navigation bar with Settings, Layout
     private func setupNavigationBar() {
         if settingsButton == nil {
             settingsButton = UIBarButtonItem(
@@ -128,16 +126,6 @@ extension DateCalculatorViewController {
                 action: #selector(openSettings)
             )
             navigationItem.leftBarButtonItem = settingsButton
-        }
-        
-        if calculateButton == nil {
-            let config = UIImage.SymbolConfiguration(paletteColors: [.systemGray, .lightGray])
-            calculateButton = UIBarButtonItem(
-                image: UIImage(systemName: "rectangle.and.pencil.and.ellipsis", withConfiguration: config),
-                style: .plain,
-                target: self,
-                action: #selector(toggleCalculateMode)
-            )
         }
         
         if viewButton == nil {
@@ -152,7 +140,7 @@ extension DateCalculatorViewController {
         }
         
         UIView.performWithoutAnimation {
-            navigationItem.rightBarButtonItems = [viewButton, calculateButton]
+            navigationItem.rightBarButtonItems = [viewButton]
             navigationItem.leftBarButtonItem = settingsButton
         }
     }
@@ -538,22 +526,6 @@ extension DateCalculatorViewController {
     @objc private func openSettings() {
         let settingsVC = SettingsTableViewController(settingsModel: viewModel.settingsModel)
         navigationController?.pushViewController(settingsVC, animated: true)
-    }
-    
-    /// Toggles the Calculate mode on/off.
-    /// Visually updates the icon color to indicate active state.
-    @objc private func toggleCalculateMode() {
-        isCalculateModeActive.toggle()
-        
-        let activeConfig = UIImage.SymbolConfiguration(paletteColors: [C.chiGong, C.mazarineBlue])
-        let inactiveConfig = UIImage.SymbolConfiguration(paletteColors: [.systemGray, .lightGray])
-        
-        let newImage = UIImage(
-            systemName: "rectangle.and.pencil.and.ellipsis",
-            withConfiguration: isCalculateModeActive ? activeConfig : inactiveConfig
-        )
-        
-        navigationItem.rightBarButtonItems?.last?.image = newImage
     }
     
     /// Animates and applies the chosen layout (Row or Grid).
