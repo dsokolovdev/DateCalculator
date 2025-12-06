@@ -104,14 +104,14 @@ final class InfoCards {
         
         // MARK: - Setup
         private func setupLabels() {
-            titleLabel.font = .systemFont(ofSize: 12, weight: .medium)
+            titleLabel.font = .systemFont(ofSize: 12 * scaleFactor, weight: .medium)
             titleLabel.textAlignment = .center
             titleLabel.textColor = C.Cards.titleLabelColor(for: cardType.backgroundColor)
             
-            iconLabel.font = .systemFont(ofSize: 34, weight: .regular)
+            iconLabel.font = .systemFont(ofSize: 34 * scaleFactor, weight: .regular)
             iconLabel.textAlignment = .center
             
-            nameLabel.font = .systemFont(ofSize: 13, weight: .medium)
+            nameLabel.font = .systemFont(ofSize: 13 * scaleFactor, weight: .medium)
             nameLabel.textAlignment = .center
             nameLabel.textColor = C.Cards.nameLabelColor(for: cardType.backgroundColor)
         }
@@ -119,16 +119,16 @@ final class InfoCards {
         /// Builds the card container, overlay, and layout stack.
         private func setupView() {
             cardView.backgroundColor = .systemBackground
-            cardView.layer.cornerRadius = 10
+            cardView.layer.cornerRadius = 10 * scaleFactor
             cardView.layer.shadowColor = UIColor.black.cgColor
             cardView.layer.shadowOpacity = 0.1
-            cardView.layer.shadowRadius = 4
-            cardView.layer.shadowOffset = CGSize(width: 0, height: 2)
+            cardView.layer.shadowRadius = 4 * scaleFactor
+            cardView.layer.shadowOffset = CGSize(width: 0, height: 2 * scaleFactor)
             cardView.translatesAutoresizingMaskIntoConstraints = false
             
             let overlayView = UIView()
             overlayView.backgroundColor = cardType.backgroundColor
-            overlayView.layer.cornerRadius = 10
+            overlayView.layer.cornerRadius = 10 * scaleFactor
             overlayView.layer.masksToBounds = true
             overlayView.translatesAutoresizingMaskIntoConstraints = false
             
@@ -146,18 +146,17 @@ final class InfoCards {
                 overlayView.trailingAnchor.constraint(equalTo: cardView.trailingAnchor),
                 overlayView.bottomAnchor.constraint(equalTo: cardView.bottomAnchor),
                 
-                stack.topAnchor.constraint(equalTo: overlayView.topAnchor, constant: 6),
+                stack.topAnchor.constraint(equalTo: overlayView.topAnchor, constant: 6 * scaleFactor),
                 stack.leadingAnchor.constraint(equalTo: overlayView.leadingAnchor),
                 stack.trailingAnchor.constraint(equalTo: overlayView.trailingAnchor),
-                stack.bottomAnchor.constraint(equalTo: overlayView.bottomAnchor, constant: -6),
+                stack.bottomAnchor.constraint(equalTo: overlayView.bottomAnchor, constant: -6 * scaleFactor),
                 
-                cardView.widthAnchor.constraint(equalToConstant: 130),
-                cardView.heightAnchor.constraint(equalToConstant: 90)
+                cardView.widthAnchor.constraint(equalToConstant: 130 * scaleFactor),
+                cardView.heightAnchor.constraint(equalToConstant: 90 * scaleFactor)
             ])
             
             cardView.layer.shadowPath = UIBezierPath(
-                roundedRect: CGRect(x: 0, y: 0, width: 130, height: 90),
-                cornerRadius: 10
+                roundedRect: CGRect(x: 0, y: 0, width: 130 * scaleFactor, height: 90 * scaleFactor), cornerRadius: 10 * scaleFactor
             ).cgPath
         }
         
@@ -175,7 +174,7 @@ final class InfoCards {
                 
                 // Case: SF Symbol (used for Year card)
                 if data.title == "Year" {
-                    let config = UIImage.SymbolConfiguration(pointSize: 26, weight: .bold)
+                    let config = UIImage.SymbolConfiguration(pointSize: 26 * scaleFactor, weight: .bold)
                     if let image = UIImage(systemName: data.icon, withConfiguration: config)?
                         .withTintColor(data.color ?? .secondaryLabel, renderingMode: .alwaysOriginal) {
                         
@@ -271,19 +270,19 @@ final class InfoCards {
             titleLabel.textColor = .label
             
             [name1Label, name2Label, name3Label].forEach {
-                $0.font = .systemFont(ofSize: 13, weight: .regular)
+                $0.font = .systemFont(ofSize: 13 * scaleFactor, weight: .regular)
                 $0.textAlignment = .left
                 $0.textColor = .secondaryLabel
             }
             
             [data1Label, data2Label, data3Label].forEach {
-                $0.font = .systemFont(ofSize: 13, weight: .medium)
+                $0.font = .systemFont(ofSize: 13 * scaleFactor, weight: .medium)
                 $0.textAlignment = .right
                 $0.textColor = .label
             }
             
             [total1Label, total2Label, total3Label].forEach {
-                $0.font = .systemFont(ofSize: 13, weight: .medium)
+                $0.font = .systemFont(ofSize: 13 * scaleFactor, weight: .medium)
                 $0.textAlignment = .right
                 $0.textColor = .secondaryLabel
             }
@@ -305,24 +304,24 @@ final class InfoCards {
             
             let stack = UIStackView(arrangedSubviews: [stack0, stack1, stack2, stack3])
             stack.axis = .vertical
-            stack.spacing = 4
+            stack.spacing = 4 * scaleFactor
             stack.translatesAutoresizingMaskIntoConstraints = false
             
             cardView.addSubview(stack)
             cardView.backgroundColor = cardType.backgroundColor
-            cardView.layer.cornerRadius = 10
+            cardView.layer.cornerRadius = 10 * scaleFactor
             cardView.layer.shadowOpacity = 0.1
-            cardView.layer.shadowRadius = 4
-            cardView.layer.shadowOffset = CGSize(width: 0, height: 2)
+            cardView.layer.shadowRadius = 4 * scaleFactor
+            cardView.layer.shadowOffset = CGSize(width: 0, height: 2 * scaleFactor)
             cardView.translatesAutoresizingMaskIntoConstraints = false
             
             NSLayoutConstraint.activate([
-                stack.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 6),
-                stack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 6),
-                stack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -6),
-                stack.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -6),
-                cardView.widthAnchor.constraint(equalToConstant: 130),
-                cardView.heightAnchor.constraint(equalToConstant: 90)
+                stack.topAnchor.constraint(equalTo: cardView.topAnchor, constant: 6 * scaleFactor),
+                stack.leadingAnchor.constraint(equalTo: cardView.leadingAnchor, constant: 6 * scaleFactor),
+                stack.trailingAnchor.constraint(equalTo: cardView.trailingAnchor, constant: -6 * scaleFactor),
+                stack.bottomAnchor.constraint(equalTo: cardView.bottomAnchor, constant: -6 * scaleFactor),
+                cardView.widthAnchor.constraint(equalToConstant: 130 * scaleFactor),
+                cardView.heightAnchor.constraint(equalToConstant: 90 * scaleFactor)
             ])
         }
         
@@ -364,7 +363,7 @@ final class InfoCards {
         init() {
             containerView.axis = .horizontal
             containerView.alignment = .center
-            containerView.spacing = 10
+            containerView.spacing = 10 * scaleFactor
             containerView.translatesAutoresizingMaskIntoConstraints = false
         }
         
@@ -388,7 +387,7 @@ extension InfoCards.Container {
     func animateAppearance() {
         for (index, view) in containerView.arrangedSubviews.enumerated() {
             view.alpha = 0
-            view.transform = CGAffineTransform(translationX: 20, y: 0)
+            view.transform = CGAffineTransform(translationX: 20 * scaleFactor, y: 0)
             UIView.animate(
                 withDuration: 0.5,
                 delay: Double(index) * 0.05,

@@ -56,12 +56,16 @@ final class DateCalculatorViewController: UIViewController {
     private var bottomToolbar: UIToolbar!
     private var dateButtonsTitlesStackView: UIStackView!
     private var dateBarContainer: UIStackView!
-    private var datesToolbarBottomConstraint: NSLayoutConstraint!
+    private var datePickerContainer: UIView!
     
     private var datesToolbarFixed: UIToolbar!
     private var startItem: UIBarButtonItem!
     private var endItem: UIBarButtonItem!
     private var swapItem: UIBarButtonItem!
+    
+    private var datePickerRealHeight: CGFloat!
+    private var bottomToolbarRealHeight: CGFloat!
+    
     
     // MARK: - Computed Properties
     private var dates: (from: Date, to: Date) { viewModel.getDates() }
@@ -95,8 +99,9 @@ final class DateCalculatorViewController: UIViewController {
         setupValuesView()
         setupBottomToolbar()
         setupDatePicker()
+        setupDateButtonsBarLabels()
         setupDatesButtonsToolbarFixed()
-        setupDateButtonsBarLables()
+        setupDateButtonsBar()
         setupScrollView()
         
         // Initialize date and horoscope data
@@ -113,6 +118,45 @@ final class DateCalculatorViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
         updateSegments(viewModel.visibleSegments)
+    }
+    
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        datePickerRealHeight = datePickerContainer.bounds.height
+        bottomToolbarRealHeight = bottomToolbar.bounds.height
+        
+        // Store actual rendered heights of the date picker and bottom toolbar.
+        // These values are used elsewhere to calculate dynamic offsets.
+        datePickerRealHeight = datePicker.bounds.height
+        bottomToolbarRealHeight = bottomToolbar.bounds.height
+        
+        // Align the "Start Date" and "End Date" labels above their corresponding buttons.
+        //
+        // UIBarButtonItem.customView is inserted into the UIToolbar's view hierarchy
+        // only after layout has begun, so during early layout passes these views
+        // may not yet be available. We bail out here and try again on the next pass.
+        guard
+            let startView = startItem.customView,
+            let endView = endItem.customView,
+            let startSuper = startView.superview,
+            let endSuper = endView.superview
+        else {
+            return
+        }
+        
+        // Convert the center points of the button views into the coordinate space
+        // of the labels' container (dateButtonsTitlesStackView).
+        //
+        // This ensures precise horizontal alignment even when the toolbar scales,
+        // transforms, or adapts to different screen sizes.
+        let startCenter = startSuper.convert(startView.center, to: dateButtonsTitlesStackView)
+        let endCenter   = endSuper.convert(endView.center, to: dateButtonsTitlesStackView)
+        
+        // Update label positions so they sit exactly above the Start/End buttons.
+        // We modify only the X coordinate to preserve vertical alignment.
+        startDateLabel.center.x = startCenter.x
+        endDateLabel.center.x   = endCenter.x
     }
 }
 
@@ -200,7 +244,7 @@ extension DateCalculatorViewController {
         periodSegmentedControlBarView = UIView()
         periodSegmentedControlBarView.translatesAutoresizingMaskIntoConstraints = false
         periodSegmentedControlBarView.backgroundColor = .systemBackground
-        periodSegmentedControlBarView.layer.cornerRadius = 20
+        periodSegmentedControlBarView.layer.cornerRadius = 20 * scaleFactor
         view.addSubview(periodSegmentedControlBarView)
         
         periodSegmentedControlBarView.layer.shadowColor = UIColor.label.cgColor
@@ -212,8 +256,8 @@ extension DateCalculatorViewController {
         let items = ["Year", "Month", "Week", "Day"]
         let activeColor = C.mazarineBlue
         let inactiveColor = UIColor.secondaryLabel
-        let activeFont = UIFont.systemFont(ofSize: 14, weight: .semibold)
-        let inactiveFont = UIFont.systemFont(ofSize: 14, weight: .medium)
+        let activeFont = UIFont.systemFont(ofSize: 14 * scaleFactor, weight: .semibold)
+        let inactiveFont = UIFont.systemFont(ofSize: 14 * scaleFactor, weight: .medium)
         
         periodSegmentedControl = UISegmentedControl(items: items)
         periodSegmentedControl.selectedSegmentIndex = 1
@@ -230,12 +274,12 @@ extension DateCalculatorViewController {
             periodSegmentedControlBarView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             periodSegmentedControlBarView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
             periodSegmentedControlBarView.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-            periodSegmentedControlBarView.heightAnchor.constraint(equalToConstant: 38),
+            periodSegmentedControlBarView.heightAnchor.constraint(equalToConstant: 38 * scaleFactor),
             
             periodSegmentedControl.centerYAnchor.constraint(equalTo: periodSegmentedControlBarView.centerYAnchor),
-            periodSegmentedControl.leadingAnchor.constraint(equalTo: periodSegmentedControlBarView.leadingAnchor, constant: 3),
-            periodSegmentedControl.trailingAnchor.constraint(equalTo: periodSegmentedControlBarView.trailingAnchor, constant: -3),
-            periodSegmentedControl.heightAnchor.constraint(equalToConstant: 32)
+            periodSegmentedControl.leadingAnchor.constraint(equalTo: periodSegmentedControlBarView.leadingAnchor, constant: 3 * scaleFactor),
+            periodSegmentedControl.trailingAnchor.constraint(equalTo: periodSegmentedControlBarView.trailingAnchor, constant: -3 * scaleFactor),
+            periodSegmentedControl.heightAnchor.constraint(equalToConstant: 32 * scaleFactor)
         ])
     }
 }
@@ -250,7 +294,7 @@ extension DateCalculatorViewController {
             valuesView.topAnchor.constraint(equalTo: periodSegmentedControlBarView.bottomAnchor, constant: 8),
             valuesView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
             valuesView.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-            valuesView.heightAnchor.constraint(equalToConstant: 120)
+            valuesView.heightAnchor.constraint(equalToConstant: 120 * scaleFactor)
         ])
     }
 }
@@ -275,10 +319,13 @@ extension DateCalculatorViewController {
         bottomToolbar.items = [backButton, smallSpace, todayButton, smallSpace, forwardButton]
         view.addSubview(bottomToolbar)
         
+        bottomToolbar.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
+        
+        let constant: CGFloat = isSmallScreen ? 16 : 10
         NSLayoutConstraint.activate([
             bottomToolbar.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
             bottomToolbar.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-            bottomToolbar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor)
+            bottomToolbar.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -constant)
         ])
     }
 }
@@ -288,6 +335,13 @@ extension DateCalculatorViewController {
     
     /// Adds and positions the date picker at the bottom of the screen.
     private func setupDatePicker() {
+        datePickerContainer = UIView()
+        datePickerContainer.translatesAutoresizingMaskIntoConstraints = false
+        datePickerContainer.backgroundColor = .clear
+        datePickerContainer.layer.cornerRadius = 20 * scaleFactor
+        
+        view.addSubview(datePickerContainer)
+        
         datePicker = UIDatePicker()
         datePicker.datePickerMode = .date          // Only date, no time
         datePicker.preferredDatePickerStyle = .wheels
@@ -295,12 +349,28 @@ extension DateCalculatorViewController {
         datePicker.timeZone = .current
         datePicker.translatesAutoresizingMaskIntoConstraints = false
         
-        view.addSubview(datePicker)
+        datePickerContainer.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
+
+        datePickerContainer.addSubview(datePicker)
+        
+        let spacing_: CGFloat = scaled(10)
+        let offsetBar = transformedOffset(44)
+        let offsetPicker = transformedOffset(170)
+        let constant = isSmallScreen ? spacing_ + offsetPicker + offsetBar : (offsetPicker - offsetBar) + spacing_
+        
+        let height: CGFloat = max(156, 170 * scaleFactor)
         
         NSLayoutConstraint.activate([
-            datePicker.bottomAnchor.constraint(equalTo: bottomToolbar.topAnchor, constant: -16),
-            datePicker.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
-            datePicker.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor)
+            datePicker.topAnchor.constraint(equalTo: datePickerContainer.topAnchor),
+            datePicker.bottomAnchor.constraint(equalTo: datePickerContainer.bottomAnchor),
+            datePicker.leadingAnchor.constraint(equalTo: datePickerContainer.leadingAnchor),
+            datePicker.trailingAnchor.constraint(equalTo: datePickerContainer.trailingAnchor),
+            
+            datePickerContainer.bottomAnchor.constraint(equalTo: bottomToolbar.topAnchor, constant: -constant),
+            datePickerContainer.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+            datePickerContainer.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
+            
+            datePickerContainer.heightAnchor.constraint(equalToConstant: height)
         ])
         
         datePicker.date = startDate
@@ -309,121 +379,6 @@ extension DateCalculatorViewController {
 }
 
 // MARK: - Dates Buttons Toolbar Setup (Buttons: StartButton, SwapButton, EndButton)
-//extension DateCalculatorViewController {
-//    
-//    /// Creates a fixed toolbar with Start / Swap / End date buttons.
-//    private func setupDatesButtonsToolbarFixed() {
-//        datesToolbarFixed = UIToolbar()
-//        datesToolbarFixed.translatesAutoresizingMaskIntoConstraints = false
-//        view.addSubview(datesToolbarFixed)
-//        
-//        NSLayoutConstraint.activate([
-//            datesToolbarFixed.bottomAnchor.constraint(equalTo: datePicker.topAnchor, constant: -8),
-//            datesToolbarFixed.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
-//            datesToolbarFixed.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-//            datesToolbarFixed.heightAnchor.constraint(equalToConstant: 44)
-//        ])
-//        
-//        // Containers for start/end labels
-//        let startContainer = UIView()
-//        let endContainer = UIView()
-//        [startContainer, endContainer].forEach {
-//            $0.translatesAutoresizingMaskIntoConstraints = false
-//            $0.isUserInteractionEnabled = true  // Enable taps
-//        }
-//        
-//        NSLayoutConstraint.activate([
-//            startContainer.widthAnchor.constraint(equalToConstant: 130),
-//            endContainer.widthAnchor.constraint(equalToConstant: 130)
-//        ])
-//        
-//        // Labels inside containers
-//        let startLabel = AnimatedLabel()
-//        startLabel.text = startDate.readableFormat
-//        startLabel.font = .systemFont(ofSize: 17, weight: .medium)
-//        startLabel.textAlignment = .center
-//        startLabel.textColor = .label
-//        startLabel.translatesAutoresizingMaskIntoConstraints = false
-//        startLabel.widthAnchor.constraint(equalToConstant: 130).isActive = true
-//        
-//        let endLabel = AnimatedLabel()
-//        endLabel.text = endDate.readableFormat
-//        endLabel.font = .systemFont(ofSize: 17, weight: .medium)
-//        endLabel.textAlignment = .center
-//        endLabel.textColor = .label
-//        endLabel.translatesAutoresizingMaskIntoConstraints = false
-//        endLabel.widthAnchor.constraint(equalToConstant: 130).isActive = true
-//        
-//        startContainer.addSubview(startLabel)
-//        endContainer.addSubview(endLabel)
-//        
-//        NSLayoutConstraint.activate([
-//            startLabel.centerXAnchor.constraint(equalTo: startContainer.centerXAnchor),
-//            startLabel.centerYAnchor.constraint(equalTo: startContainer.centerYAnchor),
-//            endLabel.centerXAnchor.constraint(equalTo: endContainer.centerXAnchor),
-//            endLabel.centerYAnchor.constraint(equalTo: endContainer.centerYAnchor)
-//        ])
-//        
-//        // Add tap gestures for Start/End selection
-//        let startTap = UITapGestureRecognizer(target: self, action: #selector(selectStartDate))
-//        let endTap = UITapGestureRecognizer(target: self, action: #selector(selectEndDate))
-//        startContainer.addGestureRecognizer(startTap)
-//        endContainer.addGestureRecognizer(endTap)
-//        
-//        // Convert containers to UIBarButtonItems
-//        startItem = UIBarButtonItem(customView: startContainer)
-//        endItem = UIBarButtonItem(customView: endContainer)
-//        
-//        // Create the Swap button
-//        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 17, weight: .medium)
-//        swapButton = AnimatedBarButtonItem(
-//            image: UIImage(systemName: "arrow.left.arrow.right", withConfiguration: symbolConfig),
-//            style: .plain,
-//            target: self,
-//            action: #selector(swapDates)
-//        )
-//        
-//        let flex = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
-//        datesToolbarFixed.items = [flex, startItem, flex, swapButton, flex, endItem, flex]
-//        
-//        highlightActiveButton()
-//    }
-//    
-//    /// Adds "Start Date" and "End Date" labels below the date selection toolbar.
-//    func setupDateButtonsBarLables() {
-//        let stackView = UIStackView()
-//        startDateLabel = UILabel()
-//        endDateLabel = UILabel()
-//        let emptyLabel = UILabel()
-//        
-//        startDateLabel.text = "Start Date"
-//        startDateLabel.textAlignment = .center
-//        startDateLabel.font = .systemFont(ofSize: 13, weight: .regular)
-//        startDateLabel.textColor = .secondaryLabel
-//        
-//        endDateLabel.textAlignment = .center
-//        endDateLabel.text = "End Date"
-//        endDateLabel.font = .systemFont(ofSize: 13, weight: .regular)
-//        endDateLabel.textColor = .secondaryLabel
-//        
-//        stackView.addArrangedSubview(startDateLabel)
-//        stackView.addArrangedSubview(emptyLabel)
-//        stackView.addArrangedSubview(endDateLabel)
-//        stackView.axis = .horizontal
-//        stackView.distribution = .fillEqually
-//        stackView.spacing = 0
-//        
-//        view.addSubview(stackView)
-//        stackView.translatesAutoresizingMaskIntoConstraints = false
-//        
-//        NSLayoutConstraint.activate([
-//            stackView.bottomAnchor.constraint(equalTo: datesToolbarFixed.topAnchor, constant: -8),
-//            stackView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
-//            stackView.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor)
-//        ])
-//    }
-//}
-
 extension DateCalculatorViewController {
     
     /// Creates a fixed toolbar with Start / Swap / End date buttons.
@@ -541,17 +496,15 @@ extension DateCalculatorViewController {
 
         view.addSubview(dateBarContainer)
         
-        let spacing_: CGFloat = scaled(8)
+        let spacing_: CGFloat = scaled(10)
         let offsetBar = transformedOffset(44)
         let offsetPicker = transformedOffset(170)
         let constant = isSmallScreen ? spacing_ + offsetPicker + offsetBar : (offsetPicker - offsetBar) + spacing_
         
-        
-        datesToolbarBottomConstraint = dateBarContainer.bottomAnchor.constraint(equalTo: datePickerContainer.topAnchor, constant: -constant)
         NSLayoutConstraint.activate([
             dateBarContainer.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
             dateBarContainer.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-            datesToolbarBottomConstraint
+            dateBarContainer.bottomAnchor.constraint(equalTo: datePickerContainer.topAnchor, constant: -constant)
         ])
     }
 }
@@ -561,23 +514,25 @@ extension DateCalculatorViewController {
     
     /// Configures scroll view to display Info Cards horizontally.
     private func setupScrollView() {
-        infoScrollView = UIScrollView()
-        infoScrollView.translatesAutoresizingMaskIntoConstraints = false
-        infoScrollView.showsHorizontalScrollIndicator = false
-        infoScrollView.alwaysBounceHorizontal = true
-        infoScrollView.backgroundColor = .clear
-        infoScrollView.decelerationRate = .fast
-        view.addSubview(infoScrollView)
-        
-        setupInfoCards(scrollView: infoScrollView)
-        
-        NSLayoutConstraint.activate([
-            infoScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            infoScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            infoScrollView.bottomAnchor.constraint(equalTo: datesToolbarFixed.topAnchor, constant: -40),
-            infoScrollView.heightAnchor.constraint(equalToConstant: 100),
-        ])
-    }
+            infoScrollView = UIScrollView()
+            infoScrollView.translatesAutoresizingMaskIntoConstraints = false
+            infoScrollView.showsHorizontalScrollIndicator = false
+            infoScrollView.alwaysBounceHorizontal = true
+            infoScrollView.backgroundColor = .clear
+            infoScrollView.decelerationRate = .fast
+            view.addSubview(infoScrollView)
+            
+            setupInfoCards(scrollView: infoScrollView)
+
+            let h: CGFloat = 100 * scaleFactor
+            NSLayoutConstraint.activate([
+                infoScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                infoScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                //infoScrollView.bottomAnchor.constraint(equalTo: datePickerContainer.topAnchor, constant: -constant),
+                infoScrollView.bottomAnchor.constraint(equalTo: dateBarContainer.topAnchor, constant: -10 * scaleFactor),
+                infoScrollView.heightAnchor.constraint(equalToConstant: h)
+            ])
+        }
 }
 
 // MARK: - Info Cards Setup
@@ -609,8 +564,8 @@ extension DateCalculatorViewController {
         infoCards.containerView.alignment = .center
         
         NSLayoutConstraint.activate([
-            infoCards.containerView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: 16),
-            infoCards.containerView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -16),
+            infoCards.containerView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor, constant: 16 * scaleFactor),
+            infoCards.containerView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor, constant: -16 * scaleFactor),
             infoCards.containerView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
             infoCards.containerView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
             infoCards.containerView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor)
@@ -852,5 +807,20 @@ extension UIImage {
         UIGraphicsEndImageContext()
         guard let cgImage = image?.cgImage else { return nil }
         self.init(cgImage: cgImage)
+    }
+}
+
+
+extension DateCalculatorViewController {
+
+    /// Returns a value scaled according to screen class (SE, Mini, Normal…).
+    func scaled(_ value: CGFloat) -> CGFloat {
+        value * scaleFactor
+    }
+    
+    /// Converts a base UI offset into a scaled offset, compensating for
+    /// transformed (scaled) height differences.
+    func transformedOffset(_ original: CGFloat) -> CGFloat {
+        (scaled(original) - original) / 2
     }
 }

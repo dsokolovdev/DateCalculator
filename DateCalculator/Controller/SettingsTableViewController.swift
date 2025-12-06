@@ -65,7 +65,7 @@ final class SettingsTableViewController: UITableViewController {
     /// Ensures the footer maintains a fixed height when the layout updates.
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        tableView.tableFooterView?.frame.size.height = 120
+        tableView.tableFooterView?.frame.size.height = 120 * scaleFactor
     }
 }
 
@@ -116,7 +116,7 @@ extension SettingsTableViewController {
             button.tag = indexPath.section * 100 + indexPath.row
             button.isEnabled = buttonItem.isEnabled
             button.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
-            button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+            button.titleLabel?.font = .systemFont(ofSize: 16 * scaleFactor, weight: .medium)
             button.contentHorizontalAlignment = .right
             button.sizeToFit()
             cell.accessoryView = button
@@ -129,15 +129,13 @@ extension SettingsTableViewController {
 // MARK: - UITableViewDelegate
 extension SettingsTableViewController {
     
-    override func tableView(_ tableView: UITableView,
-                            titleForHeaderInSection section: Int) -> String? {
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         sections[section].title
     }
     
     /// Adds more space between sections for better visual separation.
-    override func tableView(_ tableView: UITableView,
-                            heightForHeaderInSection section: Int) -> CGFloat {
-        40
+    override func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        40 * scaleFactor
     }
 }
 
@@ -148,7 +146,7 @@ extension SettingsTableViewController {
     private func configureFooter() {
         let footerLabel = UILabel()
         footerLabel.text = SettingsModel.settingsFooterText
-        footerLabel.font = .systemFont(ofSize: 13)
+        footerLabel.font = .systemFont(ofSize: 13 * scaleFactor)
         footerLabel.textColor = .secondaryLabel
         footerLabel.textAlignment = .center
         footerLabel.numberOfLines = 0
@@ -158,13 +156,13 @@ extension SettingsTableViewController {
         footerView.addSubview(footerLabel)
         
         NSLayoutConstraint.activate([
-            footerLabel.leadingAnchor.constraint(equalTo: footerView.leadingAnchor, constant: 16),
-            footerLabel.trailingAnchor.constraint(equalTo: footerView.trailingAnchor, constant: -16),
-            footerLabel.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 8),
-            footerLabel.bottomAnchor.constraint(equalTo: footerView.bottomAnchor, constant: -8)
+            footerLabel.leadingAnchor.constraint(equalTo: footerView.leadingAnchor, constant: 16 * scaleFactor),
+            footerLabel.trailingAnchor.constraint(equalTo: footerView.trailingAnchor, constant: -16 * scaleFactor),
+            footerLabel.topAnchor.constraint(equalTo: footerView.topAnchor, constant: 8 * scaleFactor),
+            footerLabel.bottomAnchor.constraint(equalTo: footerView.bottomAnchor, constant: -8 * scaleFactor)
         ])
         
-        footerView.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 120)
+        footerView.frame = CGRect(x: 0, y: 0, width: tableView.bounds.width, height: 120 * scaleFactor)
         tableView.tableFooterView = footerView
     }
 }

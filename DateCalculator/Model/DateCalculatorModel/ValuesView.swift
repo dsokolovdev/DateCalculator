@@ -118,7 +118,7 @@ extension ValuesView {
     /// Configures background, corner radius and subtle shadow.
     private func setupAppearance() {
         backgroundColor = .systemBackground
-        layer.cornerRadius = 20
+        layer.cornerRadius = 20 * scaleFactor
         layer.shadowColor = UIColor.black.cgColor
         layer.shadowOpacity = 0.05
         layer.shadowRadius = 4
@@ -172,10 +172,10 @@ extension ValuesView {
         addSubview(subview)
         subview.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            subview.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            subview.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
-            subview.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
-            subview.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8)
+            subview.topAnchor.constraint(equalTo: topAnchor, constant: 8 * scaleFactor),
+            subview.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8 * scaleFactor),
+            subview.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8 * scaleFactor),
+            subview.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8 * scaleFactor)
         ])
     }
 }
@@ -190,7 +190,7 @@ extension ValuesView {
         valueLabels.removeAll()
         rows = layoutType == .row ? 1 : segments.count
         
-        let fontSize = (max: 32.0, min: 20.0)
+        let fontSize = (max: 32.0 * scaleFactor, min: 20.0 * scaleFactor)
         let size = layoutType == .row ? fontSize.max : fontSize.max - (fontSize.max - fontSize.min)/4 * Double(segments.count)
         let labelCount = layoutType == .row ? segments.count - segmentIndex : segments.count
         
@@ -215,7 +215,7 @@ extension ValuesView {
     /// Updates width constraints for labels to distribute evenly per row.
     /// Width is applied to labels with index > 0 to keep the first value flexible.
     private func updateLabelsConstraints() {
-        let spacing: CGFloat = 8
+        let spacing: CGFloat = 8 * scaleFactor
         let segmentWidth = (bounds.width - spacing * 2) / CGFloat(segments.count)
         for row in valueLabels {
             for (index, label) in row.enumerated() {
@@ -234,7 +234,7 @@ extension ValuesView {
         guard valueLabels.indices.contains(segmentIndex), valueLabels[segmentIndex].indices.contains(0) else { return }
         
         if layoutType == .row {
-            valueLabels[0][0].textColor = C.mazarineBlue//UIColor(red: 0.15, green: 0.24, blue: 0.46, alpha: 1.00)
+            valueLabels[0][0].textColor = C.mazarineBlue
         } else if layoutType == .grid {
             
             valueLabels[segmentIndex][0].textColor = C.mazarineBlue
@@ -423,7 +423,7 @@ extension ValuesView {
         addSubview(directionView)
         directionView.translatesAutoresizingMaskIntoConstraints = false
         directionView.backgroundColor = .systemBackground
-        directionView.layer.cornerRadius = 10
+        directionView.layer.cornerRadius = 10 * scaleFactor
         directionView.layer.shadowColor = UIColor.black.cgColor
         directionView.layer.shadowOpacity = 0.05
         directionView.layer.shadowRadius = 4
@@ -432,10 +432,10 @@ extension ValuesView {
         clipsToBounds = false
         
         NSLayoutConstraint.activate([
-            directionView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
-            directionView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
-            directionView.widthAnchor.constraint(equalToConstant: 20),
-            directionView.heightAnchor.constraint(equalToConstant: 20)
+            directionView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8 * scaleFactor),
+            directionView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8 * scaleFactor),
+            directionView.widthAnchor.constraint(equalToConstant: 20 * scaleFactor),
+            directionView.heightAnchor.constraint(equalToConstant: 20 * scaleFactor)
         ])
         
         setupDirectionIcon()
@@ -463,7 +463,7 @@ extension ValuesView {
         guard let startDate, let endDate else { return }
         let isReversed = startDate > endDate
         
-        let config = UIImage.SymbolConfiguration(pointSize: 13, weight: .bold)
+        let config = UIImage.SymbolConfiguration(pointSize: 13 * scaleFactor, weight: .bold)
         let symbolName = isReversed ? "arrow.left" : "arrow.right"
         let color = isReversed ? C.veryBerry : C.mediterraneanSea
         
