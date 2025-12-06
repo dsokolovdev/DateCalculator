@@ -54,6 +54,9 @@ final class DateCalculatorViewController: UIViewController {
     private var backButton: UIBarButtonItem!
     private var forwardButton: UIBarButtonItem!
     private var bottomToolbar: UIToolbar!
+    private var dateButtonsTitlesStackView: UIStackView!
+    private var dateBarContainer: UIStackView!
+    private var datesToolbarBottomConstraint: NSLayoutConstraint!
     
     private var datesToolbarFixed: UIToolbar!
     private var startItem: UIBarButtonItem!
@@ -306,20 +309,127 @@ extension DateCalculatorViewController {
 }
 
 // MARK: - Dates Buttons Toolbar Setup (Buttons: StartButton, SwapButton, EndButton)
+//extension DateCalculatorViewController {
+//    
+//    /// Creates a fixed toolbar with Start / Swap / End date buttons.
+//    private func setupDatesButtonsToolbarFixed() {
+//        datesToolbarFixed = UIToolbar()
+//        datesToolbarFixed.translatesAutoresizingMaskIntoConstraints = false
+//        view.addSubview(datesToolbarFixed)
+//        
+//        NSLayoutConstraint.activate([
+//            datesToolbarFixed.bottomAnchor.constraint(equalTo: datePicker.topAnchor, constant: -8),
+//            datesToolbarFixed.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+//            datesToolbarFixed.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
+//            datesToolbarFixed.heightAnchor.constraint(equalToConstant: 44)
+//        ])
+//        
+//        // Containers for start/end labels
+//        let startContainer = UIView()
+//        let endContainer = UIView()
+//        [startContainer, endContainer].forEach {
+//            $0.translatesAutoresizingMaskIntoConstraints = false
+//            $0.isUserInteractionEnabled = true  // Enable taps
+//        }
+//        
+//        NSLayoutConstraint.activate([
+//            startContainer.widthAnchor.constraint(equalToConstant: 130),
+//            endContainer.widthAnchor.constraint(equalToConstant: 130)
+//        ])
+//        
+//        // Labels inside containers
+//        let startLabel = AnimatedLabel()
+//        startLabel.text = startDate.readableFormat
+//        startLabel.font = .systemFont(ofSize: 17, weight: .medium)
+//        startLabel.textAlignment = .center
+//        startLabel.textColor = .label
+//        startLabel.translatesAutoresizingMaskIntoConstraints = false
+//        startLabel.widthAnchor.constraint(equalToConstant: 130).isActive = true
+//        
+//        let endLabel = AnimatedLabel()
+//        endLabel.text = endDate.readableFormat
+//        endLabel.font = .systemFont(ofSize: 17, weight: .medium)
+//        endLabel.textAlignment = .center
+//        endLabel.textColor = .label
+//        endLabel.translatesAutoresizingMaskIntoConstraints = false
+//        endLabel.widthAnchor.constraint(equalToConstant: 130).isActive = true
+//        
+//        startContainer.addSubview(startLabel)
+//        endContainer.addSubview(endLabel)
+//        
+//        NSLayoutConstraint.activate([
+//            startLabel.centerXAnchor.constraint(equalTo: startContainer.centerXAnchor),
+//            startLabel.centerYAnchor.constraint(equalTo: startContainer.centerYAnchor),
+//            endLabel.centerXAnchor.constraint(equalTo: endContainer.centerXAnchor),
+//            endLabel.centerYAnchor.constraint(equalTo: endContainer.centerYAnchor)
+//        ])
+//        
+//        // Add tap gestures for Start/End selection
+//        let startTap = UITapGestureRecognizer(target: self, action: #selector(selectStartDate))
+//        let endTap = UITapGestureRecognizer(target: self, action: #selector(selectEndDate))
+//        startContainer.addGestureRecognizer(startTap)
+//        endContainer.addGestureRecognizer(endTap)
+//        
+//        // Convert containers to UIBarButtonItems
+//        startItem = UIBarButtonItem(customView: startContainer)
+//        endItem = UIBarButtonItem(customView: endContainer)
+//        
+//        // Create the Swap button
+//        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 17, weight: .medium)
+//        swapButton = AnimatedBarButtonItem(
+//            image: UIImage(systemName: "arrow.left.arrow.right", withConfiguration: symbolConfig),
+//            style: .plain,
+//            target: self,
+//            action: #selector(swapDates)
+//        )
+//        
+//        let flex = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+//        datesToolbarFixed.items = [flex, startItem, flex, swapButton, flex, endItem, flex]
+//        
+//        highlightActiveButton()
+//    }
+//    
+//    /// Adds "Start Date" and "End Date" labels below the date selection toolbar.
+//    func setupDateButtonsBarLables() {
+//        let stackView = UIStackView()
+//        startDateLabel = UILabel()
+//        endDateLabel = UILabel()
+//        let emptyLabel = UILabel()
+//        
+//        startDateLabel.text = "Start Date"
+//        startDateLabel.textAlignment = .center
+//        startDateLabel.font = .systemFont(ofSize: 13, weight: .regular)
+//        startDateLabel.textColor = .secondaryLabel
+//        
+//        endDateLabel.textAlignment = .center
+//        endDateLabel.text = "End Date"
+//        endDateLabel.font = .systemFont(ofSize: 13, weight: .regular)
+//        endDateLabel.textColor = .secondaryLabel
+//        
+//        stackView.addArrangedSubview(startDateLabel)
+//        stackView.addArrangedSubview(emptyLabel)
+//        stackView.addArrangedSubview(endDateLabel)
+//        stackView.axis = .horizontal
+//        stackView.distribution = .fillEqually
+//        stackView.spacing = 0
+//        
+//        view.addSubview(stackView)
+//        stackView.translatesAutoresizingMaskIntoConstraints = false
+//        
+//        NSLayoutConstraint.activate([
+//            stackView.bottomAnchor.constraint(equalTo: datesToolbarFixed.topAnchor, constant: -8),
+//            stackView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+//            stackView.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor)
+//        ])
+//    }
+//}
+
 extension DateCalculatorViewController {
     
     /// Creates a fixed toolbar with Start / Swap / End date buttons.
     private func setupDatesButtonsToolbarFixed() {
         datesToolbarFixed = UIToolbar()
         datesToolbarFixed.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(datesToolbarFixed)
-        
-        NSLayoutConstraint.activate([
-            datesToolbarFixed.bottomAnchor.constraint(equalTo: datePicker.topAnchor, constant: -8),
-            datesToolbarFixed.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
-            datesToolbarFixed.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
-            datesToolbarFixed.heightAnchor.constraint(equalToConstant: 44)
-        ])
         
         // Containers for start/end labels
         let startContainer = UIView()
@@ -330,26 +440,26 @@ extension DateCalculatorViewController {
         }
         
         NSLayoutConstraint.activate([
-            startContainer.widthAnchor.constraint(equalToConstant: 130),
-            endContainer.widthAnchor.constraint(equalToConstant: 130)
+            startContainer.widthAnchor.constraint(equalToConstant: 130 ),
+            endContainer.widthAnchor.constraint(equalToConstant: 130 )
         ])
         
         // Labels inside containers
         let startLabel = AnimatedLabel()
         startLabel.text = startDate.readableFormat
-        startLabel.font = .systemFont(ofSize: 17, weight: .medium)
+        startLabel.font = .systemFont(ofSize: 17, weight: .regular)
         startLabel.textAlignment = .center
-        startLabel.textColor = .label
+        startLabel.textColor = UIColor.label.withAlphaComponent(0.95)
         startLabel.translatesAutoresizingMaskIntoConstraints = false
-        startLabel.widthAnchor.constraint(equalToConstant: 130).isActive = true
+        startLabel.widthAnchor.constraint(equalToConstant: 130 ).isActive = true
         
         let endLabel = AnimatedLabel()
         endLabel.text = endDate.readableFormat
-        endLabel.font = .systemFont(ofSize: 17, weight: .medium)
+        endLabel.font = .systemFont(ofSize: 17, weight: .regular)
         endLabel.textAlignment = .center
-        endLabel.textColor = .label
+        endLabel.textColor = UIColor.label.withAlphaComponent(0.95)
         endLabel.translatesAutoresizingMaskIntoConstraints = false
-        endLabel.widthAnchor.constraint(equalToConstant: 130).isActive = true
+        endLabel.widthAnchor.constraint(equalToConstant: 130 ).isActive = true
         
         startContainer.addSubview(startLabel)
         endContainer.addSubview(endLabel)
@@ -372,54 +482,76 @@ extension DateCalculatorViewController {
         endItem = UIBarButtonItem(customView: endContainer)
         
         // Create the Swap button
-        let symbolConfig = UIImage.SymbolConfiguration(pointSize: 17, weight: .medium)
         swapButton = AnimatedBarButtonItem(
-            image: UIImage(systemName: "arrow.left.arrow.right", withConfiguration: symbolConfig),
+            image: UIImage(systemName: "arrow.left.arrow.right", withConfiguration: ButtonsConfig.disabledConfig),
             style: .plain,
             target: self,
             action: #selector(swapDates)
         )
-        
+
         let flex = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
         datesToolbarFixed.items = [flex, startItem, flex, swapButton, flex, endItem, flex]
+
+        datesToolbarFixed.transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
         
         highlightActiveButton()
+        
     }
-}
-
-extension DateCalculatorViewController {
     
     /// Adds "Start Date" and "End Date" labels below the date selection toolbar.
-    func setupDateButtonsBarLables() {
-        let stackView = UIStackView()
-        startDateLabel = UILabel()
-        endDateLabel = UILabel()
-        let emptyLabel = UILabel()
+    func setupDateButtonsBarLabels() {
+        startDateLabel = AnimatedLabel()
+        endDateLabel = AnimatedLabel()
         
+        let size: CGFloat = max(11, 12 * scaleFactor)
         startDateLabel.text = "Start Date"
         startDateLabel.textAlignment = .center
-        startDateLabel.font = .systemFont(ofSize: 13, weight: .regular)
-        startDateLabel.textColor = .secondaryLabel
+        startDateLabel.font = .systemFont(ofSize: size, weight: .medium)
+        startDateLabel.textColor = .tertiaryLabel.withAlphaComponent(0.85)
         
-        endDateLabel.textAlignment = .center
         endDateLabel.text = "End Date"
-        endDateLabel.font = .systemFont(ofSize: 13, weight: .regular)
-        endDateLabel.textColor = .secondaryLabel
+        endDateLabel.textAlignment = .center
+        endDateLabel.font = .systemFont(ofSize: size, weight: .medium)
+        endDateLabel.textColor = .tertiaryLabel.withAlphaComponent(0.85)
         
-        stackView.addArrangedSubview(startDateLabel)
-        stackView.addArrangedSubview(emptyLabel)
-        stackView.addArrangedSubview(endDateLabel)
-        stackView.axis = .horizontal
-        stackView.distribution = .fillEqually
-        stackView.spacing = 0
-        
-        view.addSubview(stackView)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
+        dateButtonsTitlesStackView = UIStackView(arrangedSubviews: [startDateLabel, endDateLabel])
+        dateButtonsTitlesStackView.axis = .horizontal
+        dateButtonsTitlesStackView.distribution = .fillEqually
+        dateButtonsTitlesStackView.alignment = .center
+        dateButtonsTitlesStackView.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            stackView.bottomAnchor.constraint(equalTo: datesToolbarFixed.topAnchor, constant: -8),
-            stackView.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
-            stackView.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor)
+            startDateLabel.widthAnchor.constraint(equalToConstant: 130),
+            endDateLabel.widthAnchor.constraint(equalToConstant: 130),
+        ])
+    }
+    
+    //Add buttons and titleLabels into one vertical stackView
+    func setupDateButtonsBar() {
+        let spacing: CGFloat = isSmallScreen ? 2 : 8 * scaleFactor
+        dateBarContainer = UIStackView()
+        dateBarContainer.axis = .vertical
+        dateBarContainer.alignment = .fill
+        dateBarContainer.distribution = .fill
+        dateBarContainer.spacing = spacing
+        dateBarContainer.translatesAutoresizingMaskIntoConstraints = false
+        
+        dateBarContainer.addArrangedSubview(dateButtonsTitlesStackView)
+        dateBarContainer.addArrangedSubview(datesToolbarFixed)
+
+        view.addSubview(dateBarContainer)
+        
+        let spacing_: CGFloat = scaled(8)
+        let offsetBar = transformedOffset(44)
+        let offsetPicker = transformedOffset(170)
+        let constant = isSmallScreen ? spacing_ + offsetPicker + offsetBar : (offsetPicker - offsetBar) + spacing_
+        
+        
+        datesToolbarBottomConstraint = dateBarContainer.bottomAnchor.constraint(equalTo: datePickerContainer.topAnchor, constant: -constant)
+        NSLayoutConstraint.activate([
+            dateBarContainer.leadingAnchor.constraint(equalTo: view.layoutMarginsGuide.leadingAnchor),
+            dateBarContainer.trailingAnchor.constraint(equalTo: view.layoutMarginsGuide.trailingAnchor),
+            datesToolbarBottomConstraint
         ])
     }
 }
