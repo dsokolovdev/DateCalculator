@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Images/AppIcon.png" width="100">
+</p>
+
 # DateCalculator
 
 DateCalculator is an iOS application for calculating time intervals between two dates, with multiple viewing modes: Year, Month, Week, and Day.
