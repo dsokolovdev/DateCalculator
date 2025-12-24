@@ -2,9 +2,12 @@
 .DS_Store
 build/
 DerivedData/
+*/DerivedData/*
 *.xcworkspace/xcuserdata/
+*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
 *.xcuserdata/
 *.xcuserstate
+*.xcuserdatad/
 
 # SwiftPM
 .swiftpm/

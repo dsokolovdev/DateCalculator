@@ -23,17 +23,16 @@ Built with Swift and UIKit, following Apple’s Human Interface Guidelines.
 ## Purpose
 
 DateCalculator solves a simple but common task — calculating precise time intervals between two dates.
-This project was created to gain practical experience with native iOS development, improve architectural skills (MVC → MVVM), and practice building clean, maintainable application code.
+This project was built to practice native iOS development, refine application architecture (MVC → MVVM), and focus on clean, maintainable code.
 
 ## Features
 
-- Two-date interval calculations.
-- Up to four players with quick switching.
+- Two-date interval calculation
 - Two view modes:
-  - **Row** — focused view current interval.
-  - **Grid** — overview of all intetervals.
-- Optional Week & Month segments.
-- Zodiac insights: Western & Chinese.
+  - **Row** — focused view of the current interval
+  - **Grid** — overview of all intervals
+- Optional Week & Month segments
+- Zodiac insights: Western & Chinese
 - Clean, modern UI
 
 ## Tech Stack
@@ -93,7 +92,7 @@ Clone the repository and open the project in Xcode:
 
 ```bash
 git clone https://github.com/dsokolovdev/DateCalculator.git
-cd DicePro
+cd DateCalculator
 open DateCalculator.xcodeproj
 ```
 
