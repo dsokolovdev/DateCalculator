@@ -20,7 +20,7 @@ struct K {
     
     /// Common titles used in navigation bars or alerts.
     struct Titles {
-        static let appName = "Date Calculator"
+        static let appName = "DaysBetween"
         static let settingsScreenName = "Settings"
     }
     

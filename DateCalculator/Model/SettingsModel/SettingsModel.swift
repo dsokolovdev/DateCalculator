@@ -64,7 +64,7 @@ final class SettingsModel {
         \(K.Titles.appName)
         Version: \(version) (\(build))
         Made with ❤️  by D.S.
-        © 2025
+        © 2026
         """
     }
     

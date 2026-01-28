@@ -149,7 +149,7 @@
 				DEVELOPMENT_TEAM = B9V2S6X232;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DateCalculator/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "DateInterval Pro";
+				INFOPLIST_KEY_CFBundleDisplayName = DaysBetween;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
@@ -183,7 +183,7 @@
 				DEVELOPMENT_TEAM = B9V2S6X232;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = DateCalculator/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "DateInterval Pro";
+				INFOPLIST_KEY_CFBundleDisplayName = DaysBetween;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
