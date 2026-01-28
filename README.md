@@ -2,9 +2,9 @@
   <img src="Images/Preview.png" width="800">
 </p>
 
-# DateCalculator
+# DaysBetween
 
-DateCalculator is an iOS application for calculating time intervals between two dates, with multiple viewing modes: Year, Month, Week, and Day.
+DaysBetween is an iOS application for calculating time intervals between two dates, with multiple viewing modes: Year, Month, Week, and Day.
 The app features a clean UI, intuitive navigation, smooth animations, and real-time interval recalculation.
 Built with Swift and UIKit, following Apple’s Human Interface Guidelines.
 
@@ -22,7 +22,7 @@ Built with Swift and UIKit, following Apple’s Human Interface Guidelines.
 
 ## Purpose
 
-DateCalculator solves a simple but common task — calculating precise time intervals between two dates.
+DaysBetween solves a simple but common task — calculating precise time intervals between two dates.
 This project was built to practice native iOS development, refine application architecture (MVC → MVVM), and focus on clean, maintainable code.
 
 ## Features
@@ -91,7 +91,7 @@ Extensions+Subclasses/
 Clone the repository and open the project in Xcode:
 
 ```bash
-git clone https://github.com/dsokolovdev/DateCalculator.git
+git clone https://github.com/dsokolovdev/DaysBetween.git
 cd DateCalculator
 open DateCalculator.xcodeproj
 ```
@@ -99,4 +99,4 @@ open DateCalculator.xcodeproj
 ## ❤️ Author
 
 Created by Dmitry Sokolov  
-© 2025
+© 2026
