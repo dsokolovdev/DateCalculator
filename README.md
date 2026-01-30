@@ -4,6 +4,12 @@
 
 # DaysBetween
 
+<p align="center">
+  <a href="https://apps.apple.com/us/app/daysbetween/id6758201994">
+    <img src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&amp;releaseDate=1705968000" alt="Download on App Store" style="width: 200px;">
+  </a>
+</p>
+
 DaysBetween is an iOS application for calculating time intervals between two dates, with multiple viewing modes: Year, Month, Week, and Day.
 The app features a clean UI, intuitive navigation, smooth animations, and real-time interval recalculation.
 Built with Swift and UIKit, following Apple’s Human Interface Guidelines.
